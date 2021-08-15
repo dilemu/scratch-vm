@@ -7,6 +7,25 @@ const formatMessage = require("format-message");
 const fetchWithTimeout = require("../../util/fetch-with-timeout");
 // const MathUtil = require('../../util/math-util');
 
+const REMOTE_HOST = "//192.168.31.204:60002";
+
+const RECOGNITION_URL = {
+    NORMAL: "/api/image/general/classify",
+    ANIMAL: "",
+    BOTANY: "",
+    FRUIT: "",
+    CURRENCY: "",
+    LANDMARK: "",
+};
+
+const TOKEN = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTYyOTA0Mjk3MSwiZXhwIjoxNjI5MDQzNTcxfQ.eyJ1c2VybmFtZSI6InV0ZXN0IiwicmVxdWVzdF9pZCI6ImNsYXNzcm9vbTAwMDAwMDEifQ.D2qJTLOuQ8SpEbfxaoHE2ELkyLRFdDcLeQURQWNYZe2db_MEgaAkdAtRowEG19zAzM7IdtRHL1vQMkro9YS3Xg"
+
+/**
+ * How long to wait in ms before timing out requests to translate server.
+ * @type {int}
+ */
+const serverTimeoutMs = 10000; // 10 seconds (chosen arbitrarily).
+
 /**
  * Icon svg to be displayed at the left edge of each extension block, encoded as a data URI.
  * @type {string}
@@ -39,8 +58,60 @@ class DiImageRecognition {
      */
     static get DEFAULT_IMAGERECOGNITION_STATE() {
         return {
-            types: [],
+            remote_url: "",
+            result: "图像识别结果",
         };
+    }
+
+    static get RECOGNITION_URL() {
+        return RECOGNITION_URL;
+    }
+
+    get RECOGNITION_TYPE_INFO() {
+        return [
+            {
+                name: formatMessage({
+                    id: "imageRecognition.normal",
+                    default: "通用物体",
+                }),
+                value: RECOGNITION_URL.NORMAL,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.animal",
+                    default: "动物",
+                }),
+                value: RECOGNITION_URL.ANIMAL,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.botany",
+                    default: "植物",
+                }),
+                value: RECOGNITION_URL.BOTANY,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.fruit",
+                    default: "果蔬",
+                }),
+                value: RECOGNITION_URL.FRUIT,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.currency",
+                    default: "货币",
+                }),
+                value: RECOGNITION_URL.CURRENCY,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.landmark",
+                    default: "地标",
+                }),
+                value: RECOGNITION_URL.LANDMARK,
+            },
+        ];
     }
 
     /**
@@ -60,69 +131,150 @@ class DiImageRecognition {
     }
 
     /**
+     * Create data for a menu in scratch-blocks format, consisting of an array
+     * of objects with text and value properties. The text is a translated
+     * string, and the value is one-indexed.
+     * @param {object[]} info - An array of info objects each having a name
+     *   property.
+     * @return {array} - An array of objects with text and value properties.
+     * @private
+     */
+    _buildMenu(info) {
+        return info.map((entry, index) => {
+            const obj = {};
+            obj.text = entry.name;
+            obj.value = entry.value || String(index + 1);
+            return obj;
+        });
+    }
+
+    /**
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo() {
         return {
-            id: "image_recognition",
+            id: "imageRecognition",
             name: formatMessage({
-                id: "image_recognition.categoryName",
-                default: "hello World",
+                id: "imageRecognition.categoryName",
+                default: "图像识别",
                 description: "Label for the hello world extension category",
             }),
             // menuIconURI: menuIconURI,
-            blockIconURI: blockIconURI,
+            // blockIconURI: blockIconURI,
             // showStatusButton: true,
             blocks: [
                 {
-                    opcode: "say",
+                    opcode: "inputFile",
+                    blockType: BlockType.EVENT,
+                    text: formatMessage({
+                        id: "imageRecognition.inputFile",
+                        default: "选择本地图片",
+                        description: "upload img to recogntion",
+                    }),
+                },
+                {
+                    opcode: "inputRemote",
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: "image_recognition.say",
-                        default: "say [TEXT]",
-                        description: "say something",
+                        id: "imageRecognition.inputRemote",
+                        default: "图片地址：[REMOTE]",
+                        description: "use img url to recogntion",
                     }),
                     arguments: {
-                        TEXT: {
+                        REMOTE: {
                             type: ArgumentType.STRING,
                             defaultValue: formatMessage({
-                                id: "image_recognition.defaultTextToSay",
-                                default: "hello world",
-                                description: "default text to say.",
+                                id: "imageRecognition.remoteURL",
+                                default: "图片url",
+                                description: "img url",
                             }),
                         },
                     },
                 },
                 {
-                    opcode: "upload",
+                    opcode: "recognition",
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
-                        id: "image_recognition.upload",
-                        default: "点击上传图片",
-                        description: "say something",
+                        id: "imageRecognition.recognition",
+                        default: "开始识别[RECOGNITION_TYPE]",
+                        description: "start recogntion",
                     }),
                     arguments: {
-                        TEXT: {
+                        RECOGNITION_TYPE: {
                             type: ArgumentType.STRING,
-                            defaultValue: formatMessage({
-                                id: "image_recognition.defaultTextToSay",
-                                default: "hello world",
-                                description: "default text to say.",
-                            }),
+                            menu: "RECOGNITION_TYPE",
+                            defaultValue: this.RECOGNITION_TYPE_INFO.NORMAL,
                         },
                     },
                 },
+                {
+                    opcode: "result",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "imageRecognition.result",
+                        default: "图像识别结果",
+                        description: "recogntion result",
+                    }),
+                },
             ],
-            menus: {},
+            menus: {
+                RECOGNITION_TYPE: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.RECOGNITION_TYPE_INFO),
+                },
+            },
         };
     }
 
-    say(args, util) {
-        const message = args.TEXT;
+    inputFile(args, util) {
         const state = this._getState(util.target);
-        console.log(state);
-        console.log(message);
-        this.runtime.emit("SAY", util.target, "say", message);
+        const input = document.createElement("input");
+        input.setAttribute("style", "display: none;");
+        input.setAttribute("id", "imageRecognition");
+        input.setAttribute("type", "file");
+        input.setAttribute("name", "file");
+        document.querySelector("body").appendChild(input);
+        input.onchange = () => {
+            const file = input.files[0];
+            state.file = file;
+        };
+        input.click();
+    }
+
+    inputRemote(args, util) {
+        const remote_url = args.REMOTE;
+        const state = this._getState(util.target);
+        let reg = /^\w+[^\s]+(\.[^\s]+){1,}$/;
+        if (reg.test(remote_url)) state.remote_url = remote_url;
+        else alert("url格式不合法");
+    }
+
+    recognition(args, util) {
+        const state = this._getState(util.target);
+        if (state.remote_url) {
+            return fetchWithTimeout(state.remote_url, {}, serverTimeoutMs)
+                .then((response) => response.blob())
+                .then((blob) => {
+                    const form = new FormData();
+                    form.append("file", blob);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", REMOTE_HOST + args.RECOGNITION_TYPE);
+                    xhr.setRequestHeader("Token", TOKEN)
+                    xhr.send(form);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4) {
+                            const res = JSON.parse(xhr.response);
+                            state.result = res.data.words_result && res.data.words_result.length && res.data.words_result[0].words || ""
+                        }
+                    };
+                });
+        }
+        // console.log(REMOTE_HOST + args.RECOGNITION_TYPE)
+    }
+
+    result(args, util) {
+        const state = this._getState(util.target);
+        return state.result;
     }
 }
 

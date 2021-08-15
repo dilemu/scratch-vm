@@ -25,10 +25,12 @@ const builtinExtensions = {
     pen: () => require('../extensions/scratch3_pen'),
     music: () => require('../extensions/scratch3_music'),
     text2speech: () => require('../extensions/scratch3_text2speech'),
+    speech2text: () => require('../extensions/scratch3_speech2text'),
     translate: () => require('../extensions/scratch3_translate'),
     videoSensing: () => require('../extensions/scratch3_video_sensing'),
     makeymakey: () => require('../extensions/scratch3_makeymakey'),
     helloWorld: () => require('../extensions/scratch3_hello_world'),
+    imageRecognition: () => require('../extensions/di_image_recognition'),
 };
 
 const builtinDevices = {
