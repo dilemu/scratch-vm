@@ -18,7 +18,8 @@ const RECOGNITION_URL = {
     LANDMARK: "",
 };
 
-const TOKEN = "eyJhbGciOiJIUzUxMiIsImlhdCI6MTYyOTA0Mjk3MSwiZXhwIjoxNjI5MDQzNTcxfQ.eyJ1c2VybmFtZSI6InV0ZXN0IiwicmVxdWVzdF9pZCI6ImNsYXNzcm9vbTAwMDAwMDEifQ.D2qJTLOuQ8SpEbfxaoHE2ELkyLRFdDcLeQURQWNYZe2db_MEgaAkdAtRowEG19zAzM7IdtRHL1vQMkro9YS3Xg"
+const TOKEN =
+    "eyJhbGciOiJIUzUxMiIsImlhdCI6MTYyOTA0Mjk3MSwiZXhwIjoxNjI5MDQzNTcxfQ.eyJ1c2VybmFtZSI6InV0ZXN0IiwicmVxdWVzdF9pZCI6ImNsYXNzcm9vbTAwMDAwMDEifQ.D2qJTLOuQ8SpEbfxaoHE2ELkyLRFdDcLeQURQWNYZe2db_MEgaAkdAtRowEG19zAzM7IdtRHL1vQMkro9YS3Xg";
 
 /**
  * How long to wait in ms before timing out requests to translate server.
@@ -114,6 +115,46 @@ class DiImageRecognition {
         ];
     }
 
+    get WAIT_LIST() {
+        return [
+            {
+                name: formatMessage({
+                    id: "imageRecognition.time_1",
+                    default: "1",
+                }),
+                value: 1,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.time_2",
+                    default: "2",
+                }),
+                value: 2,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.time_31",
+                    default: "3",
+                }),
+                value: 3,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.time_4",
+                    default: "4",
+                }),
+                value: 4,
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.time_5",
+                    default: "5",
+                }),
+                value: 5,
+            },
+        ];
+    }
+
     /**
      * @param {Target} target - collect  state for this target.
      * @returns {HelloWorldState} the mutable state associated with that target. This will be created if necessary.
@@ -196,7 +237,7 @@ class DiImageRecognition {
                     blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: "imageRecognition.recognition",
-                        default: "开始识别[RECOGNITION_TYPE]",
+                        default: "[WAIT_TIME]秒后开始识别[RECOGNITION_TYPE]",
                         description: "start recogntion",
                     }),
                     arguments: {
@@ -204,6 +245,11 @@ class DiImageRecognition {
                             type: ArgumentType.STRING,
                             menu: "RECOGNITION_TYPE",
                             defaultValue: this.RECOGNITION_TYPE_INFO.NORMAL,
+                        },
+                        WAIT_TIME: {
+                            type: ArgumentType.NUMBER,
+                            menu: "WAIT_TIME_LIST",
+                            defaultValue: 2,
                         },
                     },
                 },
@@ -221,6 +267,10 @@ class DiImageRecognition {
                 RECOGNITION_TYPE: {
                     acceptReporters: true,
                     items: this._buildMenu(this.RECOGNITION_TYPE_INFO),
+                },
+                WAIT_TIME_LIST: {
+                    acceptReporters: true,
+                    items: this._buildMenu(this.WAIT_LIST),
                 },
             },
         };
@@ -250,25 +300,41 @@ class DiImageRecognition {
     }
 
     recognition(args, util) {
-        const state = this._getState(util.target);
-        if (state.remote_url) {
-            return fetchWithTimeout(state.remote_url, {}, serverTimeoutMs)
-                .then((response) => response.blob())
-                .then((blob) => {
-                    const form = new FormData();
-                    form.append("file", blob);
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("POST", REMOTE_HOST + args.RECOGNITION_TYPE);
-                    xhr.setRequestHeader("Token", TOKEN)
-                    xhr.send(form);
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState == 4) {
-                            const res = JSON.parse(xhr.response);
-                            state.result = res.data.words_result && res.data.words_result.length && res.data.words_result[0].words || ""
-                        }
-                    };
-                });
+        console.log(1);
+        if (util.stackTimerNeedsInit()) {
+            const duration = Math.max(0, 1000 * Cast.toNumber(args.WAIT_TIME));
+            util.startStackTimer(duration);
+            this.runtime.requestRedraw();
+            util.yield();
+        } else if (!util.stackTimerFinished()) {
+            util.yield();
+            console.log(5);
+        } else {
+            const state = this._getState(util.target);
+            if (state.remote_url) {
+                return fetchWithTimeout(state.remote_url, {}, serverTimeoutMs)
+                    .then((response) => response.blob())
+                    .then((blob) => {
+                        const form = new FormData();
+                        form.append("file", blob);
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("POST", REMOTE_HOST + args.RECOGNITION_TYPE);
+                        xhr.setRequestHeader("Token", TOKEN);
+                        xhr.send(form);
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState == 4) {
+                                const res = JSON.parse(xhr.response);
+                                state.result =
+                                    (res.data.words_result &&
+                                        res.data.words_result.length &&
+                                        res.data.words_result[0].words) ||
+                                    "";
+                            }
+                        };
+                    });
+            }
         }
+
         // console.log(REMOTE_HOST + args.RECOGNITION_TYPE)
     }
 
