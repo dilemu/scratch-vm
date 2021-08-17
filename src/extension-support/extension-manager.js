@@ -31,6 +31,13 @@ const builtinExtensions = {
     makeymakey: () => require('../extensions/scratch3_makeymakey'),
     helloWorld: () => require('../extensions/scratch3_hello_world'),
     imageRecognition: () => require('../extensions/di_image_recognition'),
+    diVoice: () => require('../extensions/di_voice'),
+    diBodyRecognition: () => require('../extensions/di_body_recognition'),
+    diImageProcessing: () => require('../extensions/di_image_processing'),
+    diMachineLeaning: () => require('../extensions/di_machine_leaning'),
+    diIntelligentData: () => require('../extensions/di_intelligent_data'),
+    diTextRecognition: () => require('../extensions/di_text_recognition'),
+    diWordProcessing: () => require('../extensions/di_word_processing'),
 };
 
 const builtinDevices = {
