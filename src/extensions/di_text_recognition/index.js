@@ -50,8 +50,8 @@ class TextRecognition {
     static get DEFAULT_IMAGERECOGNITION_STATE() {
         return {
             robotAnswer: "",
-            robotQuestion: "",
-            robotAnswerList: []
+            robotQuestion: "你好",
+            robotAnswerList: [],
         };
     }
 
@@ -147,7 +147,7 @@ class TextRecognition {
                     arguments: {
                         TXT: {
                             type: ArgumentType.STRING,
-                            default: formatMessage({
+                            defaultValue: formatMessage({
                                 id: "diTextRecognition.defaultSayWords",
                                 default: "你好",
                                 description: "default word",
@@ -171,33 +171,41 @@ class TextRecognition {
     sayToRobot(args, util) {
         const TXT = args.TXT;
         const state = this._getState(util.target);
-        const generateAnswer = list => {
-          state.robotAnswer = list[Math.floor((Math.random()*list.length))]
-        }
+        const generateAnswer = (list) => {
+            state.robotAnswer =
+                list[Math.floor(Math.random() * list.length)].say;
+        };
         if (TXT) {
-            if(TXT === state.robotQuestion) {
-              generateAnswer(state.robotAnswerList)
+            if (TXT === state.robotQuestion && state.robotAnswerList.length) {
+                generateAnswer(state.robotAnswerList);
             } else {
-              return fetchWithTimeout(
-                this.runtime.REMOTE_HOST + this.REMOTE_URL.UNIT,
-                {},
-                serverTimeoutMs
-            )
-                .then((response) => response.json())
-                .then((data) => {
-                    state.robotQuestion = TXT
-                    state.robotAnswerList = data.data
-                    generateAnswer(state.robotAnswerList)
-                });
+                return fetchWithTimeout(
+                    this.runtime.REMOTE_HOST + this.REMOTE_URL.UNIT,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            terminal_id: "test",
+                            query: state.robotQuestion,
+                        }),
+                    },
+                    serverTimeoutMs
+                )
+                    .then((response) => response.json())
+                    .then((data) => {
+                        state.robotQuestion = TXT;
+                        state.robotAnswerList = data.data;
+                        generateAnswer(state.robotAnswerList);
+                    });
             }
         } else {
-          alert('请输入智能对话内容！')
+            alert("请输入智能对话内容！");
         }
     }
 
     RobotAnswer(args, util) {
-      const state = this._getState(util.target);
-      return state.RobotAnswer
+        const state = this._getState(util.target);
+        return state.RobotAnswer;
     }
 }
 
