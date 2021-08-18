@@ -58,12 +58,6 @@ class testExt{
     }
   }
 
-  scan (){
-    this.comm.getDeviceList().then(result => {
-        this.runtime.emit(this.runtime.constructor.PERIPHERAL_LIST_UPDATE, result);
-    });
-  }
-
   getInfo (){
     return {
       id: 'diVoice',

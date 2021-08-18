@@ -7,7 +7,7 @@ const formatMessage = require("format-message");
 const fetchWithTimeout = require("../../util/fetch-with-timeout");
 // const MathUtil = require('../../util/math-util');
 
-const REMOTE_HOST = "//localhost:60002";
+const REMOTE_HOST = "//192.168.31.204:60002";
 
 const RECOGNITION_URL = {
     NORMAL: "/api/image/general/classify",
@@ -61,7 +61,7 @@ class DiImageRecognition {
     static get DEFAULT_IMAGERECOGNITION_STATE() {
         return {
             remote_url: "",
-            result: "图像识别结果",
+            result: "待识别",
         };
     }
 
@@ -262,7 +262,7 @@ class DiImageRecognition {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: "imageRecognition.result",
-                        default: "图像识别结果",
+                        default: "结果",
                         description: "recogntion result",
                     }),
                 },
@@ -326,11 +326,7 @@ class DiImageRecognition {
                         xhr.onreadystatechange = function () {
                             if (xhr.readyState == 4) {
                                 const res = JSON.parse(xhr.response);
-                                state.result =
-                                    (res.data.words_result &&
-                                        res.data.words_result.length &&
-                                        res.data.words_result[0].words) ||
-                                    "";
+                                state.result = res.data && res.data.name || "未能识别";
                             }
                         };
                     });

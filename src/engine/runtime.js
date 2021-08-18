@@ -191,6 +191,8 @@ class Runtime extends EventEmitter {
     constructor () {
         super();
 
+        this.REMOTE_HOST = "//192.168.31.204:60002";
+
         /**
          * Target management and storage.
          * @type {Array.<!Target>}
