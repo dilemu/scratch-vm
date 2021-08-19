@@ -192,6 +192,7 @@ class Runtime extends EventEmitter {
         super();
 
         this.REMOTE_HOST = "//192.168.31.204:60002";
+        this.uuid = uid();
 
         /**
          * Target management and storage.

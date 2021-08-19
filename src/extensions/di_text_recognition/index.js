@@ -185,7 +185,7 @@ class TextRecognition {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            terminal_id: "test",
+                            terminal_id: this.runtime.uuid,
                             query: state.robotQuestion,
                         }),
                     },
@@ -205,7 +205,7 @@ class TextRecognition {
 
     RobotAnswer(args, util) {
         const state = this._getState(util.target);
-        return state.RobotAnswer;
+        return state.robotAnswer;
     }
 }
 
