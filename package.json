@@ -1,6 +1,6 @@
 {
-  "name": "openblock-vm",
-  "version": "0.2.0",
+  "name": "delightmom-scratch-vm",
+  "version": "0.1.0",
   "description": "Virtual Machine for Delightmom",
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",
@@ -9,10 +9,10 @@
     "type": "git",
     "url": "git+ssh://git@github.com/dilemu/scratch-vm.git"
   },
-  "main": "./dist/node/openblock-vm.js",
+  "main": "./dist/node/delightmom-scratch-vm.js",
   "browser": "./src/index.js",
   "scripts": {
-    "build": "npm run docs && webpack --progress --colors --bail",
+    "build": "webpack --progress --colors --bail",
     "coverage": "tap ./test/{unit,integration}/*.js --coverage --coverage-report=lcov",
     "deploy": "touch playground/.nojekyll",
     "docs": "jsdoc -c .jsdoc.json",
@@ -74,8 +74,8 @@
     "jsdoc": "^3.6.2",
     "json": "^9.0.4",
     "lodash.defaultsdeep": "4.6.1",
-    "openblock-blocks": "0.1.0-prerelease.20210324090738",
-    "openblock-l10n": "^3.10.20210413104833",
+    "delightmom-scratch-blocks": "latest",
+    "delightmom-scratch-l10n": "latest",
     "pngjs": "^3.3.2",
     "scratch-audio": "latest",
     "scratch-render": "latest",
