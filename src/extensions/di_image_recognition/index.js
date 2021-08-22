@@ -7,7 +7,7 @@ const formatMessage = require("format-message");
 const fetchWithTimeout = require("../../util/fetch-with-timeout");
 // const MathUtil = require('../../util/math-util');
 
-const REMOTE_HOST = "//192.168.31.204:60002";
+const REMOTE_HOST = "//152.136.211.42:60002";
 
 const RECOGNITION_URL = {
     NORMAL: "/api/image/general/classify",
