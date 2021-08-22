@@ -383,27 +383,27 @@ class diVoice {
                         },
                     },
                 },
-                {
-                    opcode: "voiceRecognition",
-                    text: formatMessage({
-                        id: "text2speech.voiceRecognitionBlock",
-                        default: "开始[RECO_LANG]语音识别，持续[VOICE_RECO_TIME]秒",
-                        description: "Voice recognition",
-                    }),
-                    blockType: BlockType.COMMAND,
-                    arguments: {
-                        RECO_LANG: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "1537",
-                            menu: "RECO_LANG"
-                        },
-                        VOICE_RECO_TIME: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 2,
-                            menu: "VOICE_RECO_TIME"
-                        },
-                    },
-                },
+                // {
+                //     opcode: "voiceRecognition",
+                //     text: formatMessage({
+                //         id: "text2speech.voiceRecognitionBlock",
+                //         default: "开始[RECO_LANG]语音识别，持续[VOICE_RECO_TIME]秒",
+                //         description: "Voice recognition",
+                //     }),
+                //     blockType: BlockType.COMMAND,
+                //     arguments: {
+                //         RECO_LANG: {
+                //             type: ArgumentType.STRING,
+                //             defaultValue: "1537",
+                //             menu: "RECO_LANG"
+                //         },
+                //         VOICE_RECO_TIME: {
+                //             type: ArgumentType.NUMBER,
+                //             defaultValue: 2,
+                //             menu: "VOICE_RECO_TIME"
+                //         },
+                //     },
+                // },
             ],
             menus: {
                 VOICE_LIST: {
