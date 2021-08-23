@@ -191,7 +191,7 @@ class Runtime extends EventEmitter {
     constructor () {
         super();
 
-        this.REMOTE_HOST = "//152.136.211.42:60002";
+        this.REMOTE_HOST = "http://152.136.211.42:60002";
         this.uuid = uid();
 
         /**
