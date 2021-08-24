@@ -210,7 +210,7 @@ class DiImageRecognition {
             blocks: [
                 {
                     opcode: "inputFile",
-                    blockType: BlockType.EVENT,
+                    blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: "imageRecognition.inputFile",
                         default: "选择本地图片",
@@ -282,17 +282,68 @@ class DiImageRecognition {
 
     inputFile(args, util) {
         const state = this._getState(util.target);
-        const input = document.createElement("input");
-        input.setAttribute("style", "display: none;");
-        input.setAttribute("id", "imageRecognition");
-        input.setAttribute("type", "file");
-        input.setAttribute("name", "file");
-        document.querySelector("body").appendChild(input);
-        input.onchange = () => {
-            const file = input.files[0];
-            state.file = file;
+        // const input = document.createElement("input");
+        // input.setAttribute("style", "display: none;");
+        // input.setAttribute("id", "imageRecognition");
+        // input.setAttribute("type", "file");
+        // input.setAttribute("name", "file");
+        // document.querySelector("body").appendChild(input);
+        // input.onchange = () => {
+        //     const file = input.files[0];
+        //     state.file = file;
+        // };
+        // input.click();
+        let width = 480;
+        let height = 200;
+        let left = window.innerWidth / 2;
+        let top = window.innerHeight / 2;
+        let x = left - width / 2;
+        let y = top - height / 2;
+        const uploadWindow = window.open(
+            "",
+            null,
+            "top=" + y + ",left=" + x + ",width=" + width + ",height=" + height
+        );
+        uploadWindow.document.open();
+        uploadWindow.document.write(
+            "<html><head><title>" + "标题" + "</title></head><body>"
+        );
+        uploadWindow.document.write("<p>" + "上传学习数据" + "</p>");
+        uploadWindow.document.write('<input type="file" id="upload-files">');
+        uploadWindow.document.write(
+            '<input type="button" value="' + "上传" + '" id="upload-button">'
+        );
+        uploadWindow.document.write("</body></html>");
+        uploadWindow.document.close();
+
+        return new Promise(resolve => {
+            uploadWindow.document.getElementById("upload-button").onclick = () => {
+                this.uploadButtonClicked(uploadWindow, resolve);
+            };
+        })
+    }
+
+    uploadButtonClicked(uploadWindow, resolve) {
+        let files = uploadWindow.document.getElementById("upload-files").files;
+
+        if (files.length <= 0) {
+            alert("Please select JSON file.");
+            return false;
+        }
+
+        let fr = new FileReader();
+
+        fr.onload = (e) => {
+            console.log(e.target);
+            resolve();
         };
-        input.click();
+
+        fr.onloadend = (e) => {
+            uploadWindow.document.getElementById("upload-files").value = "";
+        };
+
+        fr.readAsText(files.item(0));
+        uploadWindow.close();
     }
 
     inputRemote(args, util) {
@@ -314,25 +365,30 @@ class DiImageRecognition {
         } else {
             const state = this._getState(util.target);
             if (state.remote_url) {
-                return new Promise(resolve => {
+                return new Promise((resolve) => {
                     fetchWithTimeout(state.remote_url, {}, serverTimeoutMs)
-                    .then((response) => response.blob())
-                    .then((blob) => {
-                        const form = new FormData();
-                        form.append("file", blob);
-                        const xhr = new XMLHttpRequest();
-                        xhr.open("POST", REMOTE_HOST + args.RECOGNITION_TYPE);
-                        xhr.setRequestHeader("Token", TOKEN);
-                        xhr.send(form);
-                        xhr.onreadystatechange = function () {
-                            if (xhr.readyState == 4) {
-                                const res = JSON.parse(xhr.response);
-                                state.result = res.data && res.data.name || "未能识别";
-                            }
-                            resolve()
-                        };
-                    });
-                })
+                        .then((response) => response.blob())
+                        .then((blob) => {
+                            const form = new FormData();
+                            form.append("file", blob);
+                            const xhr = new XMLHttpRequest();
+                            xhr.open(
+                                "POST",
+                                REMOTE_HOST + args.RECOGNITION_TYPE
+                            );
+                            xhr.setRequestHeader("Token", TOKEN);
+                            xhr.send(form);
+                            xhr.onreadystatechange = function () {
+                                if (xhr.readyState == 4) {
+                                    const res = JSON.parse(xhr.response);
+                                    state.result =
+                                        (res.data && res.data.name) ||
+                                        "未能识别";
+                                }
+                                resolve();
+                            };
+                        });
+                });
             }
         }
 
