@@ -314,7 +314,8 @@ class DiImageRecognition {
         } else {
             const state = this._getState(util.target);
             if (state.remote_url) {
-                return fetchWithTimeout(state.remote_url, {}, serverTimeoutMs)
+                return new Promise(resolve => {
+                    fetchWithTimeout(state.remote_url, {}, serverTimeoutMs)
                     .then((response) => response.blob())
                     .then((blob) => {
                         const form = new FormData();
@@ -328,8 +329,10 @@ class DiImageRecognition {
                                 const res = JSON.parse(xhr.response);
                                 state.result = res.data && res.data.name || "未能识别";
                             }
+                            resolve()
                         };
                     });
+                })
             }
         }
 

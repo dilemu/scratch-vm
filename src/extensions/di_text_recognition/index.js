@@ -129,7 +129,7 @@ class TextRecognition {
     getInfo() {
         return {
             id: "diTextRecognition",
-            name: "Test",
+            name: "文本识别",
             color1: "#0079FF",
             color2: "#0061CC",
             color3: "#3373CC",
@@ -171,15 +171,14 @@ class TextRecognition {
     sayToRobot(args, util) {
         const TXT = args.TXT;
         const state = this._getState(util.target);
+        state.robotQuestion = TXT;
         const generateAnswer = (list) => {
             state.robotAnswer =
                 list[Math.floor(Math.random() * list.length)].say;
         };
         if (TXT) {
-            if (TXT === state.robotQuestion && state.robotAnswerList.length) {
-                generateAnswer(state.robotAnswerList);
-            } else {
-                return fetchWithTimeout(
+            return new Promise((resolve, reject) => {
+                fetchWithTimeout(
                     this.runtime.REMOTE_HOST + this.REMOTE_URL.UNIT,
                     {
                         method: "POST",
@@ -193,11 +192,11 @@ class TextRecognition {
                 )
                     .then((response) => response.json())
                     .then((data) => {
-                        state.robotQuestion = TXT;
                         state.robotAnswerList = data.data;
                         generateAnswer(state.robotAnswerList);
+                        resolve()
                     });
-            }
+            })
         } else {
             alert("请输入智能对话内容！");
         }
