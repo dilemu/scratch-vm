@@ -1,5 +1,6 @@
 const EventEmitter = require('events');
 const {OrderedMap} = require('immutable');
+const Cache = require('cache-lib')
 
 const ArgumentType = require('../extension-support/argument-type');
 const Blocks = require('./blocks');
@@ -193,6 +194,8 @@ class Runtime extends EventEmitter {
 
         this.REMOTE_HOST = "http://152.136.211.42:60002";
         this.uuid = uid();
+        this.localStorage = new Cache('localStorage')
+        this.sessionStorage = new Cache('sessionStorage')
 
         /**
          * Target management and storage.

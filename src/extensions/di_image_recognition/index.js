@@ -387,7 +387,10 @@ class DiImageRecognition {
                                 }
                                 resolve();
                             };
-                        });
+                        })
+                        .catch(err => {
+                            console.log('RequestError', state.remote_url, err)
+                        })
                 });
             }
         }

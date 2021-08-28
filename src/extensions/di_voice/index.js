@@ -508,8 +508,8 @@ class diVoice {
                 //         });
                 //     });
                 // })
-                .catch((err) => {
-                    log.warn(err);
+                .catch(err => {
+                    console.log('RequestError', state.remote_url, err)
                 })
         );
     }

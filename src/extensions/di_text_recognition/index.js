@@ -195,6 +195,9 @@ class TextRecognition {
                         state.robotAnswerList = data.data;
                         generateAnswer(state.robotAnswerList);
                         resolve()
+                    })
+                    .catch(err => {
+                        console.log('RequestError', state.remote_url, err)
                     });
             })
         } else {

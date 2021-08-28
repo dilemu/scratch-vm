@@ -759,8 +759,8 @@ class Scratch3Text2SpeechBlocks {
                 });
             })
             .catch(err => {
-                log.warn(err);
-            });
+                console.log('RequestError', state.remote_url, err)
+            })
     }
 }
 module.exports = Scratch3Text2SpeechBlocks;
