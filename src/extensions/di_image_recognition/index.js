@@ -351,10 +351,14 @@ class DiImageRecognition {
         const state = this._getState(util.target);
         let reg = /^\w+[^\s]+(\.[^\s]+){1,}$/;
         if (reg.test(remote_url)) state.remote_url = remote_url;
-        else alert("url格式不合法");
+        else this.runtime.emit("MESSAGE_ERROR", "url格式不合法");
     }
 
     recognition(args, util) {
+        if(!this.runtime.getToken()) {
+            this.runtime.emit("MESSAGE_INFO", "该积木块要求登录！")
+            return
+        }
         if (util.stackTimerNeedsInit()) {
             const duration = Math.max(0, 1000 * Cast.toNumber(args.WAIT_TIME));
             util.startStackTimer(duration);
@@ -364,6 +368,7 @@ class DiImageRecognition {
             util.yield();
         } else {
             const state = this._getState(util.target);
+            console.log(this.runtime.getToken())
             if (state.remote_url) {
                 return new Promise((resolve) => {
                     fetchWithTimeout(state.remote_url, {}, serverTimeoutMs)

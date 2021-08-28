@@ -196,6 +196,9 @@ class Runtime extends EventEmitter {
         this.uuid = uid();
         this.localStorage = new Cache('localStorage')
         this.sessionStorage = new Cache('sessionStorage')
+        this.getToken = () => {
+            return this.sessionStorage.get("userData") && this.sessionStorage.get("userData").token
+        }
 
         /**
          * Target management and storage.
@@ -473,6 +476,10 @@ class Runtime extends EventEmitter {
          * @type {?string}
          */
         this.origin = null;
+    }
+
+    static get GUI_DIALOG () {
+        return 'GUI_DIALOG';
     }
 
     /**
