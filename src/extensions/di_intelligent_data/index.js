@@ -5,6 +5,7 @@ const Clone = require("../../util/clone");
 const formatMessage = require("format-message");
 const fetchWithTimeout = require("../../util/fetch-with-timeout");
 const log = require("../../util/log");
+const { v4: uuidv4 } = require("uuid");
 
 const menuIconURI = null;
 const blockIconURI = null;
@@ -16,21 +17,27 @@ const blockIconURI = null;
 const serverTimeoutMs = 10000; // 10 seconds (chosen arbitrarily).
 
 const REMOTE_URL = {
-    UNIT: "/api/talk/classify",
+    CITY_LIST: "/api/weather/city",
+    WEATHER_DAY: "/api/weather/day",
+    WEATHER_NOW: "/api/weather/now",
+    WEATHER_AIR: "/api/weather/air",
 };
 
-class TextRecognition {
+class IntelligentRecognition {
     constructor(runtime) {
         this.runtime = runtime;
-        // communication related
-        this.comm = runtime.ioDevices.comm;
         this.session = null;
-        this.runtime.registerPeripheralExtension("diTextRecognition", this);
+        this.runtime.registerPeripheralExtension(
+            "diIntelligentRecognition",
+            this
+        );
         // session callbacks
         this.reporter = null;
         // string op
         this.decoder = new TextDecoder();
         this.lineBuffer = "";
+        this.cityList = [];
+        this._getCityList("青岛").then((list) => (this.cityList = list));
     }
 
     /**
@@ -38,22 +45,53 @@ class TextRecognition {
      * @type {string}
      */
     static get STATE_KEY() {
-        return "Di.TextRecognition";
+        return "Di.IntelligentRecognition";
     }
     /**
      * The default state, to be used when a target has no existing state.
      * @type {HelloWorldState}
      */
-    static get DEFAULT_IMAGERECOGNITION_STATE() {
+    static get DEFAULT_STATE() {
         return {
-            robotAnswer: "",
-            robotQuestion: "你好",
-            robotAnswerList: [],
+            cityList: [],
         };
     }
 
     get REMOTE_URL() {
         return REMOTE_URL;
+    }
+
+    _getCityList(location) {
+        return new Promise((resolve, reject) => {
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL.CITY_LIST,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                    body: JSON.stringify({
+                        location,
+                    }),
+                },
+                serverTimeoutMs
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    const list =
+                        Array.isArray(data.data) &&
+                        data.data.map((elem) => ({
+                            text: elem.name,
+                            value: elem.id,
+                        }));
+                    resolve(data.data);
+                })
+                .catch((err) => {
+                    console.log("RequestError", state.remote_url, err);
+                    reject(err);
+                });
+        });
     }
 
     /**
@@ -62,12 +100,10 @@ class TextRecognition {
      * @private
      */
     _getState(target) {
-        let state = target.getCustomState(TextRecognition.STATE_KEY);
+        let state = target.getCustomState(IntelligentRecognition.STATE_KEY);
         if (!state) {
-            state = Clone.simple(
-                TextRecognition.DEFAULT_IMAGERECOGNITION_STATE
-            );
-            target.setCustomState(TextRecognition.STATE_KEY, state);
+            state = Clone.simple(IntelligentRecognition.DEFAULT_STATE);
+            target.setCustomState(IntelligentRecognition.STATE_KEY, state);
         }
         return state;
     }
@@ -92,78 +128,205 @@ class TextRecognition {
 
     getInfo() {
         return {
-            id: "diTextRecognition",
+            id: "diIntelligentRecognition",
             name: "智能数据",
-            color1: "#D8D8D8",
-            color2: "#009AFF",
-            color3: "#3373CC",
+            color1: "#2DDCFF",
+            color2: "#5DE1FC",
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
                 {
-                    opcode: "RobotAnswer",
+                    id: "123",
+                    opcode: "chooseCity",
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
-                        id: "diTextRecognition.talkBack",
-                        default: "我的回答是[TXT]",
-                        description: "Robot saying",
+                        id: "diIntelligentRecognition.chooseCity",
+                        default: "选择城市",
+                        description: "chooseCity",
+                    })
+                },
+                {
+                    opcode: "getHighTemperatureM",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.heightemperaturem",
+                        default: "[CITY]的最高气温（°C）",
+                        description: "temperature",
                     }),
                     arguments: {
-                      TXT: {
-                          type: ArgumentType.IMAGE,
-                          defaultValue: formatMessage({
-                              id: "diTextRecognition.defaultSayWords",
-                              default: "你好",
-                              description: "default word",
-                          }),
-                      },
-                  },
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                    },
+                },
+                {
+                    opcode: "getLowTemperatureM",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.lowtemperaturem",
+                        default: "[CITY]的最低气温（°C）",
+                        description: "temperature",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                    },
+                },
+                {
+                    opcode: "getHighTemperatureI",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.heightemperaturei",
+                        default: "[CITY]的最高气温（°F）",
+                        description: "temperature",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                    },
+                },
+                {
+                    opcode: "getLowTemperatureI",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.lowtemperaturei",
+                        default: "[CITY]的最低气温（°F）",
+                        description: "temperature",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                    },
+                },
+                {
+                    opcode: "getHumidity",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.getHumidity",
+                        default: "[CITY]的湿度（%）",
+                        description: "temperature",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                    },
                 },
             ],
         };
     }
 
-    sayToRobot(args, util) {
-        const TXT = args.TXT;
+    chooseCity(args, util) {
+        if(!this.runtime.isLogin()) return
+        const uuid = uuidv4();
         const state = this._getState(util.target);
-        state.robotQuestion = TXT;
-        const generateAnswer = (list) => {
-            state.robotAnswer =
-                list[Math.floor(Math.random() * list.length)].say;
-        };
-        if (TXT) {
-            return new Promise((resolve, reject) => {
-                fetchWithTimeout(
-                    this.runtime.REMOTE_HOST + this.REMOTE_URL.UNIT,
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            terminal_id: this.runtime.uuid,
-                            query: state.robotQuestion,
-                        }),
-                    },
-                    serverTimeoutMs
-                )
-                    .then((response) => response.json())
-                    .then((data) => {
-                        state.robotAnswerList = data.data;
-                        generateAnswer(state.robotAnswerList);
-                        resolve();
-                    })
-                    .catch(err => {
-                        console.log('RequestError', state.remote_url, err)
-                    });
+        this.runtime.emit("start_choose_city", uuid);
+        return new Promise((resolve) => {
+            this.runtime.on(uuid, (city) => {
+                state.city = city;
+                resolve(city);
             });
-        } else {
-            alert("请输入智能对话内容！");
-        }
+        });
     }
 
-    RobotAnswer(args, util) {
+    getHighTemperature(location, unit="m") {
+        return new Promise((resolve) => {
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL.WEATHER_DAY,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        location,unit
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                },
+                serverTimeoutMs
+            )
+            .then((response) => response.json())
+            .then((data) => {
+                resolve(data.data);
+            })
+            .catch((err) => {
+                console.log("RequestError", err);
+                reject(err);
+            });
+        });
+    }
+
+    getHighTemperatureM(args, util) {
+        if(!this.runtime.isLogin()) return
         const state = this._getState(util.target);
-        return state.robotAnswer;
+        const location = args.CITY;
+        return new Promise((resolve, reject) => {
+            this.getHighTemperature(location, "m").then(data => {
+                resolve(Array.isArray(data)?data[0].tempMax:data.tempMax)
+            }).catch(err => {
+                reject(err)
+            })
+        }) 
+    }
+
+    getLowTemperatureM(args, util) {
+        if(!this.runtime.isLogin()) return
+        const state = this._getState(util.target);
+        const location = args.CITY;
+        return new Promise((resolve, reject) => {
+            this.getHighTemperature(location, "m").then(data => {
+                resolve(Array.isArray(data)?data[0].tempMax:data.tempMin)
+            }).catch(err => {
+                reject(err)
+            })
+        }) 
+    }
+
+    getHighTemperatureI(args, util) {
+        if(!this.runtime.isLogin()) return
+        const state = this._getState(util.target);
+        const location = args.CITY;
+        return new Promise((resolve, reject) => {
+            this.getHighTemperature(location, "i").then(data => {
+                resolve(Array.isArray(data)?data[0].tempMax:data.tempMax)
+            }).catch(err => {
+                reject(err)
+            })
+        }) 
+    }
+
+    getLowTemperatureI(args, util) {
+        if(!this.runtime.isLogin()) return
+        const state = this._getState(util.target);
+        const location = args.CITY;
+        return new Promise((resolve, reject) => {
+            this.getHighTemperature(location, "i").then(data => {
+                resolve(Array.isArray(data)?data[0].tempMax:data.tempMin)
+            }).catch(err => {
+                reject(err)
+            })
+        }) 
+    }
+
+    getHumidity(args, util) {
+        if(!this.runtime.isLogin()) return
+        const location = args.CITY;
+        return new Promise((resolve, reject) => {
+            this.getHighTemperature(location).then(data => {
+                resolve(data.humidity)
+            }).catch(err => {
+                reject(err)
+            })
+        }) 
     }
 }
 
-module.exports = TextRecognition;
+module.exports = IntelligentRecognition;
