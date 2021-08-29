@@ -355,10 +355,8 @@ class DiImageRecognition {
     }
 
     recognition(args, util) {
-        if(!this.runtime.getToken()) {
-            this.runtime.emit("MESSAGE_INFO", "该积木块要求登录！")
-            return
-        }
+        // this.runtime.requireLogin()
+        if(!this.runtime.isLogin()) return
         if (util.stackTimerNeedsInit()) {
             const duration = Math.max(0, 1000 * Cast.toNumber(args.WAIT_TIME));
             util.startStackTimer(duration);

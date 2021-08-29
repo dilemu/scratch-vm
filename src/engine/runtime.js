@@ -194,11 +194,18 @@ class Runtime extends EventEmitter {
 
         this.REMOTE_HOST = "http://152.136.211.42:60002";
         this.uuid = uid();
-        this.localStorage = new Cache('localStorage')
-        this.sessionStorage = new Cache('sessionStorage')
+        this.localStorage = new Cache('localStorage');
+        this.sessionStorage = new Cache('sessionStorage');
         this.getToken = () => {
             return this.sessionStorage.get("userData") && this.sessionStorage.get("userData").token
-        }
+        };
+        this.isLogin = () => {
+            if(!this.getToken()) {
+                this.emit("MESSAGE_INFO", "未登录！");
+                return 0;
+            }
+            return 1;
+        };
 
         /**
          * Target management and storage.
