@@ -21,7 +21,10 @@ const REMOTE_URL = {
     WEATHER_DAY: "/api/weather/day",
     WEATHER_NOW: "/api/weather/now",
     WEATHER_AIR: "/api/weather/air",
+    WORLD_TIME: "/api/weather/time"
 };
+
+const AIR_INDEX = ["AQI", "PM2.5", "PM10", "CO", "SO2", "NO2"];
 
 class IntelligentRecognition {
     constructor(runtime) {
@@ -54,11 +57,16 @@ class IntelligentRecognition {
     static get DEFAULT_STATE() {
         return {
             cityList: [],
+            city: {}
         };
     }
 
     get REMOTE_URL() {
         return REMOTE_URL;
+    }
+
+    get AIR_INDEX() {
+        return AIR_INDEX;
     }
 
     _getCityList(location) {
@@ -143,7 +151,7 @@ class IntelligentRecognition {
                         id: "diIntelligentRecognition.chooseCity",
                         default: "选择城市",
                         description: "chooseCity",
-                    })
+                    }),
                 },
                 {
                     opcode: "getHighTemperatureM",
@@ -211,7 +219,97 @@ class IntelligentRecognition {
                     text: formatMessage({
                         id: "diIntelligentRecognition.getHumidity",
                         default: "[CITY]的湿度（%）",
-                        description: "temperature",
+                        description: "getHumidity",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                    },
+                },
+                {
+                    opcode: "getWeather",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.getWeather",
+                        default: "[CITY]的天气",
+                        description: "getWeather",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                    },
+                },
+                {
+                    opcode: "getAirQuality",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.getAirQuality",
+                        default: "[CITY]空气质量的[INDEX]指标",
+                        description: "getAirQuality",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                        INDEX: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "AQI",
+                            menu: "AIR_INDEX",
+                        },
+                    },
+                },
+                {
+                    opcode: "getSunRiseTime",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.getSunRiseTime",
+                        default: "[CITY]的日出时间[UNIT]",
+                        description: "getSunRiseTime",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                        UNIT: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0,
+                            menu: "TIME_UNIT",
+                        },
+                    },
+                },
+                {
+                    opcode: "getSunSetTime",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.getSunSetTime",
+                        default: "[CITY]的日落时间[UNIT]",
+                        description: "getSunSetTime",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                        UNIT: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0,
+                            menu: "TIME_UNIT",
+                        },
+                    },
+                },
+                {
+                    opcode: "getWorldTime",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.getWorldTime",
+                        default: "[CITY]的当前时间",
+                        description: "getWorldTime",
                     }),
                     arguments: {
                         CITY: {
@@ -221,30 +319,50 @@ class IntelligentRecognition {
                     },
                 },
             ],
+            menus: {
+                AIR_INDEX: this.AIR_INDEX,
+                TIME_UNIT: [
+                    {
+                        text: "小时",
+                        value: 0
+                    },
+                    {
+                        text: "分钟",
+                        value: 1
+                    }
+                ]
+            },
         };
     }
 
     chooseCity(args, util) {
-        if(!this.runtime.isLogin()) return
+        if (!this.runtime.isLogin()) return;
         const uuid = uuidv4();
         const state = this._getState(util.target);
         this.runtime.emit("start_choose_city", uuid);
         return new Promise((resolve) => {
             this.runtime.on(uuid, (city) => {
+                console.log(city)
                 state.city = city;
                 resolve(city);
             });
         });
     }
 
-    getHighTemperature(location, unit="m") {
-        return new Promise((resolve) => {
+    getWeatherAll(city, unit = "m") {
+        return new Promise((resolve, reject) => {
+            const location = city.value;
+            if(!location.trim()) {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！")
+            }
             fetchWithTimeout(
                 this.runtime.REMOTE_HOST + this.REMOTE_URL.WEATHER_DAY,
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        location,unit
+                        location,
+                        unit,
                     }),
                     headers: {
                         "Content-Type": "application/json",
@@ -253,79 +371,231 @@ class IntelligentRecognition {
                 },
                 serverTimeoutMs
             )
-            .then((response) => response.json())
-            .then((data) => {
-                resolve(data.data);
-            })
-            .catch((err) => {
-                console.log("RequestError", err);
-                reject(err);
-            });
+                .then((response) => response.json())
+                .then((data) => {
+                    resolve(data.data);
+                })
+                .catch((err) => {
+                    console.log("RequestError", err);
+                    reject(err);
+                });
         });
     }
 
     getHighTemperatureM(args, util) {
-        if(!this.runtime.isLogin()) return
+        if (!this.runtime.isLogin()) return;
         const state = this._getState(util.target);
         const location = args.CITY;
         return new Promise((resolve, reject) => {
-            this.getHighTemperature(location, "m").then(data => {
-                resolve(Array.isArray(data)?data[0].tempMax:data.tempMax)
-            }).catch(err => {
-                reject(err)
-            })
-        }) 
+            this.getWeatherAll(location, "m")
+                .then((data) => {
+                    resolve(
+                        Array.isArray(data) ? data[0].tempMax : data.tempMax
+                    );
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
     }
 
     getLowTemperatureM(args, util) {
-        if(!this.runtime.isLogin()) return
+        if (!this.runtime.isLogin()) return;
         const state = this._getState(util.target);
         const location = args.CITY;
         return new Promise((resolve, reject) => {
-            this.getHighTemperature(location, "m").then(data => {
-                resolve(Array.isArray(data)?data[0].tempMax:data.tempMin)
-            }).catch(err => {
-                reject(err)
-            })
-        }) 
+            this.getWeatherAll(location, "m")
+                .then((data) => {
+                    resolve(
+                        Array.isArray(data) ? data[0].tempMax : data.tempMin
+                    );
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
     }
 
     getHighTemperatureI(args, util) {
-        if(!this.runtime.isLogin()) return
+        if (!this.runtime.isLogin()) return;
         const state = this._getState(util.target);
         const location = args.CITY;
         return new Promise((resolve, reject) => {
-            this.getHighTemperature(location, "i").then(data => {
-                resolve(Array.isArray(data)?data[0].tempMax:data.tempMax)
-            }).catch(err => {
-                reject(err)
-            })
-        }) 
+            this.getWeatherAll(location, "i")
+                .then((data) => {
+                    resolve(
+                        Array.isArray(data) ? data[0].tempMax : data.tempMax
+                    );
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
     }
 
     getLowTemperatureI(args, util) {
-        if(!this.runtime.isLogin()) return
+        if (!this.runtime.isLogin()) return;
         const state = this._getState(util.target);
         const location = args.CITY;
         return new Promise((resolve, reject) => {
-            this.getHighTemperature(location, "i").then(data => {
-                resolve(Array.isArray(data)?data[0].tempMax:data.tempMin)
-            }).catch(err => {
-                reject(err)
-            })
-        }) 
+            this.getWeatherAll(location, "i")
+                .then((data) => {
+                    resolve(
+                        Array.isArray(data) ? data[0].tempMax : data.tempMin
+                    );
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
     }
 
     getHumidity(args, util) {
-        if(!this.runtime.isLogin()) return
+        if (!this.runtime.isLogin()) return;
         const location = args.CITY;
         return new Promise((resolve, reject) => {
-            this.getHighTemperature(location).then(data => {
-                resolve(data.humidity)
-            }).catch(err => {
-                reject(err)
-            })
-        }) 
+            this.getWeatherAll(location)
+                .then((data) => {
+                    resolve(data.humidity);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+
+    getWeather(args) {
+        if (!this.runtime.isLogin()) return;
+        const location = args.CITY;
+        return new Promise((resolve, reject) => {
+            this.getWeatherAll(location)
+                .then((data) => {
+                    resolve(data.textDay);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+
+    getAirQuality(args) {
+        if (!this.runtime.isLogin()) return;
+        const location = args.CITY;
+        const index = args.INDEX;
+        return new Promise((resolve) => {
+            if(!location.trim()) {
+                this.runtime.emit("MESSAGE_INFO", "未登录！");
+                reject("请选择城市！")
+            }
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL.WEATHER_AIR,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        location,
+                        unit: "m",
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                },
+                serverTimeoutMs
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    let key = "";
+                    switch (index) {
+                        case "AQI":
+                            key = "aqi";
+                            break;
+                        case "PM2.5":
+                            key = "pm2p5";
+                            break;
+                        case "PM10":
+                            key = "pm10";
+                            break;
+                        case "CO":
+                            key = "co";
+                            break;
+                        case "SO2":
+                            key = "so2";
+                            break;
+                        case "NO2":
+                            key = "no2";
+                            break;
+                        default:
+                            key = "aqi";
+                            break;
+                    }
+                    resolve(data.data[key]);
+                })
+                .catch((err) => {
+                    console.log("RequestError", err);
+                    reject(err);
+                });
+        });
+    }
+
+    getSunRiseTime(args) {
+        if (!this.runtime.isLogin()) return;
+        const location = args.CITY;
+        const unitIndex = args.UNIT;
+        return new Promise((resolve, reject) => {
+            this.getWeatherAll(location)
+                .then((data) => {
+                    const sunriseTime = data.sunrise.split(":")
+                    resolve(sunriseTime[unitIndex]);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+
+    getSunSetTime(args) {
+        if (!this.runtime.isLogin()) return;
+        const location = args.CITY;
+        const unitIndex = args.UNIT;
+        return new Promise((resolve, reject) => {
+            this.getWeatherAll(location)
+                .then((data) => {
+                    const sunsetTime = data.sunset.split(":")
+                    resolve(sunsetTime[unitIndex]);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
+
+    getWorldTime(args) {
+        if (!this.runtime.isLogin()) return;
+        const location = args.CITY;
+        return new Promise((resolve, reject) => {
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL.WORLD_TIME,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        timeZone: location.tz
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                },
+                serverTimeoutMs
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    resolve(data.data);
+                })
+                .catch((err) => {
+                    console.log("RequestError", err);
+                    reject(err);
+                });
+        })
     }
 }
 
