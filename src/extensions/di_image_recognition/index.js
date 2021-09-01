@@ -16,10 +16,6 @@ const RECOGNITION_URL = {
     CURRENCY: "/api/image/currency/classify",
     LANDMARK: "/api/image/landmark/classify",
 };
-
-const TOKEN =
-    "eyJhbGciOiJIUzUxMiIsImlhdCI6MTYyOTA0Mjk3MSwiZXhwIjoxNjI5MDQzNTcxfQ.eyJ1c2VybmFtZSI6InV0ZXN0IiwicmVxdWVzdF9pZCI6ImNsYXNzcm9vbTAwMDAwMDEifQ.D2qJTLOuQ8SpEbfxaoHE2ELkyLRFdDcLeQURQWNYZe2db_MEgaAkdAtRowEG19zAzM7IdtRHL1vQMkro9YS3Xg";
-
 /**
  * How long to wait in ms before timing out requests to translate server.
  * @type {int}
@@ -355,7 +351,6 @@ class DiImageRecognition {
     }
 
     recognition(args, util) {
-        // this.runtime.requireLogin()
         if (!this.runtime.isLogin()) return;
         const state = this._getState(util.target);
         if (state.remote_url) {
@@ -381,7 +376,7 @@ class DiImageRecognition {
                                 "POST",
                                 this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE
                             );
-                            xhr.setRequestHeader("Token", TOKEN);
+                            xhr.setRequestHeader("Access-Token", this.runtime.getToken());
                             xhr.send(form);
                             xhr.onreadystatechange = function () {
                                 if (xhr.readyState == 4) {
@@ -413,7 +408,7 @@ class DiImageRecognition {
                     form.append("file", blob);
                     const xhr = new XMLHttpRequest();
                     xhr.open("POST", this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE);
-                    xhr.setRequestHeader("Token", TOKEN);
+                    xhr.setRequestHeader("Access-Token", this.runtime.getToken());
                     xhr.send(form);
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4) {

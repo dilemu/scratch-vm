@@ -453,6 +453,7 @@ class diVoice {
                     }),
                     headers: {
                         "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
                     },
                 },
                 serverTimeoutMs
