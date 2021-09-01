@@ -5,9 +5,8 @@ const MathUtil = require("../../util/math-util");
 const Clone = require("../../util/clone");
 const formatMessage = require("format-message");
 const fetchWithTimeout = require("../../util/fetch-with-timeout");
+const { v4: uuidv4 } = require("uuid");
 // const MathUtil = require('../../util/math-util');
-
-const REMOTE_HOST = "http://152.136.211.42:60002";
 
 const RECOGNITION_URL = {
     NORMAL: "/api/image/general/classify",
@@ -316,11 +315,12 @@ class DiImageRecognition {
         uploadWindow.document.write("</body></html>");
         uploadWindow.document.close();
 
-        return new Promise(resolve => {
-            uploadWindow.document.getElementById("upload-button").onclick = () => {
-                this.uploadButtonClicked(uploadWindow, resolve);
-            };
-        })
+        return new Promise((resolve) => {
+            uploadWindow.document.getElementById("upload-button").onclick =
+                () => {
+                    this.uploadButtonClicked(uploadWindow, resolve);
+                };
+        });
     }
 
     uploadButtonClicked(uploadWindow, resolve) {
@@ -356,18 +356,20 @@ class DiImageRecognition {
 
     recognition(args, util) {
         // this.runtime.requireLogin()
-        if(!this.runtime.isLogin()) return
-        if (util.stackTimerNeedsInit()) {
-            const duration = Math.max(0, 1000 * Cast.toNumber(args.WAIT_TIME));
-            util.startStackTimer(duration);
-            this.runtime.requestRedraw();
-            util.yield();
-        } else if (!util.stackTimerFinished()) {
-            util.yield();
-        } else {
-            const state = this._getState(util.target);
-            console.log(this.runtime.getToken())
-            if (state.remote_url) {
+        if (!this.runtime.isLogin()) return;
+        const state = this._getState(util.target);
+        if (state.remote_url) {
+            if (util.stackTimerNeedsInit()) {
+                const duration = Math.max(
+                    0,
+                    1000 * Cast.toNumber(args.WAIT_TIME)
+                );
+                util.startStackTimer(duration);
+                this.runtime.requestRedraw();
+                util.yield();
+            } else if (!util.stackTimerFinished()) {
+                util.yield();
+            } else {
                 return new Promise((resolve) => {
                     fetchWithTimeout(state.remote_url, {}, serverTimeoutMs)
                         .then((response) => response.blob())
@@ -377,7 +379,7 @@ class DiImageRecognition {
                             const xhr = new XMLHttpRequest();
                             xhr.open(
                                 "POST",
-                                REMOTE_HOST + args.RECOGNITION_TYPE
+                                this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE
                             );
                             xhr.setRequestHeader("Token", TOKEN);
                             xhr.send(form);
@@ -391,14 +393,41 @@ class DiImageRecognition {
                                 resolve();
                             };
                         })
-                        .catch(err => {
-                            console.log('RequestError', state.remote_url, err)
-                        })
+                        .catch((err) => {
+                            console.log("RequestError", state.remote_url, err);
+                        });
                 });
             }
+        } else {
+            const uuid = uuidv4();
+            const options = {
+                uuid,
+                type: "photo",
+                countDown: args.WAIT_TIME,
+            };
+            this.runtime.emit("start_web_cam", options);
+            return new Promise((resolve, reject) => {
+                this.runtime.on(uuid, (blob) => {
+                    if (!blob) reject();
+                    const form = new FormData();
+                    form.append("file", blob);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("POST", this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE);
+                    xhr.setRequestHeader("Token", TOKEN);
+                    xhr.send(form);
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4) {
+                            const res = JSON.parse(xhr.response);
+                            state.result =
+                                (res.data && res.data.name) || "未能识别";
+                        }
+                        resolve();
+                    };
+                });
+            });
         }
 
-        // console.log(REMOTE_HOST + args.RECOGNITION_TYPE)
+        // console.log(this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE)
     }
 
     result(args, util) {
