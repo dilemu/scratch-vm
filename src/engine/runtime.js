@@ -1351,7 +1351,8 @@ class Runtime extends EventEmitter {
             category: categoryInfo.name,
             colour: categoryInfo.color1,
             colourSecondary: categoryInfo.color2,
-            colourTertiary: categoryInfo.color3
+            colourTertiary: categoryInfo.color3,
+            checkboxInFlyout: blockInfo.checkboxInFlyout
         };
         const context = {
             // TODO: store this somewhere so that we can map args appropriately after translation.
@@ -1457,7 +1458,8 @@ class Runtime extends EventEmitter {
         }
 
         if (blockInfo.blockType === BlockType.REPORTER) {
-            if (!blockInfo.disableMonitor && context.inputList.length === 0) {
+            // if (!blockInfo.disableMonitor && context.inputList.length === 0) {
+            if (!blockInfo.disableMonitor && blockJSON.checkboxInFlyout === undefined) {
                 blockJSON.checkboxInFlyout = true;
             }
         } else if (blockInfo.blockType === BlockType.LOOP) {

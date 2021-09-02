@@ -147,6 +147,7 @@ class IntelligentRecognition {
                     id: "123",
                     opcode: "chooseCity",
                     blockType: BlockType.REPORTER,
+                    checkboxInFlyout: false,
                     text: formatMessage({
                         id: "diIntelligentRecognition.chooseCity",
                         default: "选择城市",
