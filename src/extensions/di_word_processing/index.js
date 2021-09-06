@@ -55,9 +55,13 @@ class WordProcessing {
      * The default state, to be used when a target has no existing state.
      * @type {HelloWorldState}
      */
-    static get DEFAULT_IMAGERECOGNITION_STATE() {
+    static get DEFAULT_STATE() {
         return {
             lexicalResult: [],
+            similarResult: null,
+            chineseQAResult: {},
+            correctionResult: {},
+            addressResult: {},
         };
     }
 
@@ -138,6 +142,60 @@ class WordProcessing {
         ];
     }
 
+    get SINGLE_CHINESE_TYPE_INFO() {
+        return [
+            {
+                name: formatMessage({
+                    id: "textRecognition.chinese_type.1",
+                    default: "单字",
+                }),
+                value: "含义",
+            },
+            {
+                name: formatMessage({
+                    id: "textRecognition.chinese_type.2",
+                    default: "词语",
+                }),
+                value: "词语",
+            },
+            {
+                name: formatMessage({
+                    id: "textRecognition.chinese_type.3",
+                    default: "成语",
+                }),
+                value: "成语",
+            },
+            {
+                name: formatMessage({
+                    id: "textRecognition.chinese_type.4",
+                    default: "诗词",
+                }),
+                value: "诗词",
+            },
+            {
+                name: formatMessage({
+                    id: "textRecognition.chinese_type.5",
+                    default: "古文",
+                }),
+                value: "古文",
+            },
+            {
+                name: formatMessage({
+                    id: "textRecognition.chinese_type.6",
+                    default: "俗语歇后语",
+                }),
+                value: "俗语歇后语",
+            },
+            {
+                name: formatMessage({
+                    id: "textRecognition.chinese_type.7",
+                    default: "名言警句",
+                }),
+                value: "名言警句",
+            },
+        ];
+    }
+
     /**
      * @param {Target} target - collect  state for this target.
      * @returns {HelloWorldState} the mutable state associated with that target. This will be created if necessary.
@@ -146,7 +204,7 @@ class WordProcessing {
     _getState(target) {
         let state = target.getCustomState(WordProcessing.STATE_KEY);
         if (!state) {
-            state = Clone.simple(WordProcessing.DEFAULT_IMAGERECOGNITION_STATE);
+            state = Clone.simple(WordProcessing.DEFAULT_STATE);
             target.setCustomState(WordProcessing.STATE_KEY, state);
         }
         return state;
@@ -295,6 +353,43 @@ class WordProcessing {
                     }),
                 },
                 {
+                    opcode: "chineseQA1",
+                    text: formatMessage({
+                        id: "diWordProcessing.chineseQA1",
+                        default: "对[TXT]进行[TYPE]检索",
+                        description: "chineseQA1",
+                    }),
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        TXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: formatMessage({
+                                id: "diWordProcessing.chineseQATXT1",
+                                default: "迪",
+                                description: "default word",
+                            }),
+                        },
+                        TYPE: {
+                            type: ArgumentType.STRING,
+                            defaultValue: formatMessage({
+                                id: "diWordProcessing.chineseQATXTTYPE",
+                                default: "含义",
+                                description: "default word",
+                            }),
+                            menu: "SINGLE_CHINESE_TYPE_LIST",
+                        },
+                    },
+                },
+                {
+                    opcode: "chineseQAResult1",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diWordProcessing.chineseQAResult1",
+                        default: "汉语单字检索结果",
+                        description: "chineseQAResult1",
+                    }),
+                },
+                {
                     opcode: "chineseQA",
                     text: formatMessage({
                         id: "diWordProcessing.chineseQA",
@@ -382,13 +477,14 @@ class WordProcessing {
                         ADDRESS_TYPE: {
                             type: ArgumentType.STRING,
                             defaultValue: formatMessage({
-                                id: "diWordProcessing.addressTXT",
+                                id: "diWordProcessing.addressResultType",
                                 default: "province",
                                 description: "default address type",
                             }),
                             menu: "ADDRESS_TYPE_LIST",
                         },
                     },
+                    label: "地址分析结果",
                 },
             ],
             menus: {
@@ -397,6 +493,9 @@ class WordProcessing {
                 },
                 ADDRESS_TYPE_LIST: {
                     items: this._buildMenu(this.ADDRESS_TYPE_INFO),
+                },
+                SINGLE_CHINESE_TYPE_LIST: {
+                    items: this._buildMenu(this.SINGLE_CHINESE_TYPE_INFO),
                 },
             },
         };
@@ -456,21 +555,168 @@ class WordProcessing {
         return (state.emoResult && state.emoResult[sentiment]) || "未识别";
     }
 
-    wordSimilar(args, util) {}
+    wordSimilar(args, util) {
+        if (!this.runtime.isLogin()) return;
+        const state = this._getState(util.target);
+        const TXT1 = args.TXT1;
+        const TXT2 = args.TXT2;
+        return new Promise((resolve, reject) => {
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL["SIMILAR"],
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        text: TXT1,
+                        text_2: TXT2,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                },
+                serverTimeoutMs
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    state.similarResult = data.data;
+                    resolve(data.data);
+                })
+                .catch((err) => {
+                    console.log("RequestError", err);
+                    reject(err);
+                });
+        });
+    }
 
-    wordSimilarResult(args, util) {}
+    wordSimilarResult(args, util) {
+        const state = this._getState(util.target);
+        return state.similarResult ? state.similarResult + "%" : "未能识别";
+    }
 
-    chineseQA(args, util) {}
+    chineseQA(args, util) {
+        if (!this.runtime.isLogin()) return;
+        const state = this._getState(util.target);
+        const TXT = args.TXT;
+        const TYPE = args.TYPE;
+        return new Promise((resolve, reject) => {
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL["CHINESE_QA"],
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        text: TYPE ? TXT + "的" + TYPE : TXT,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                },
+                serverTimeoutMs
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.code === 0) state.chineseQAResult = data.data;
+                    else state.chineseQAResult = {};
+                    resolve();
+                })
+                .catch((err) => {
+                    console.log("RequestError", err);
+                    reject(err);
+                });
+        });
+    }
 
-    chineseQAResult(args, util) {}
+    chineseQAResult(args, util) {
+        const state = this._getState(util.target);
+        return (
+            (state.chineseQAResult.answer &&
+                state.chineseQAResult.answer.join("\n")) ||
+            ""
+        );
+    }
 
-    correction(args, util) {}
+    chineseQA1(args, util) {
+        return this.chineseQA(args, util);
+    }
 
-    correctionResult(args, util) {}
+    chineseQAResult1(args, util) {
+        return this.chineseQAResult(args, util);
+    }
 
-    address(args, util) {}
+    correction(args, util) {
+        if (!this.runtime.isLogin()) return;
+        const state = this._getState(util.target);
+        const TXT = args.TXT;
+        return new Promise((resolve, reject) => {
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL["CORRECTION"],
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        text: TXT,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                },
+                serverTimeoutMs
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.code === 0) state.correctionResult = data.data;
+                    else state.correctionResult = {};
+                    resolve();
+                })
+                .catch((err) => {
+                    console.log("RequestError", err);
+                    reject(err);
+                });
+        });
+    }
 
-    addressResult(args, util) {}
+    correctionResult(args, util) {
+        const state = this._getState(util.target);
+        return state.correctionResult.correct_query || "";
+    }
+
+    address(args, util) {
+        if (!this.runtime.isLogin()) return;
+        const state = this._getState(util.target);
+        const TXT = args.TXT;
+        return new Promise((resolve, reject) => {
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL["ADDRESS"],
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        text: TXT,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                },
+                serverTimeoutMs
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.code === 0) state.addressResult = data.data;
+                    else state.addressResult = {};
+                    resolve();
+                })
+                .catch((err) => {
+                    console.log("RequestError", err);
+                    reject(err);
+                });
+        });
+    }
+
+    addressResult(args, util) {
+        const ADDRESS_TYPE = args.ADDRESS_TYPE;
+        const state = this._getState(util.target);
+        return state.addressResult[ADDRESS_TYPE] || "";
+    }
 }
 
 module.exports = WordProcessing;

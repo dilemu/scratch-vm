@@ -79,7 +79,7 @@ class diVoice {
                     id: "diVoice.xiaodi",
                     default: "小迪",
                 }),
-                value: "103",
+                value: "4",
             },
             {
                 name: formatMessage({
