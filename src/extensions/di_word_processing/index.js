@@ -385,7 +385,7 @@ class WordProcessing {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: "diWordProcessing.chineseQAResult1",
-                        default: "汉语单字检索结果",
+                        default: "汉语检索结果",
                         description: "chineseQAResult1",
                     }),
                 },
