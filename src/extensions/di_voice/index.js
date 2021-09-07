@@ -5,6 +5,7 @@ const Cast = require("../../util/cast");
 const Clone = require("../../util/clone");
 const formatMessage = require("format-message");
 const fetchWithTimeout = require("../../util/fetch-with-timeout");
+const { v4: uuidv4 } = require("uuid");
 const log = require("../../util/log");
 
 const menuIconURI = null;
@@ -12,7 +13,7 @@ const blockIconURI = null;
 
 const REMOTE_URL = {
     SPEAK: "/api/voice/speech/synthesis",
-    RECOGNITION: "/api/voice/classify"
+    RECOGNITION: "/api/voice/classify",
 };
 
 /**
@@ -65,6 +66,7 @@ class diVoice {
             spd: 5,
             pit: 5,
             vol: 5,
+            voiceResult: []
         };
     }
 
@@ -278,7 +280,7 @@ class diVoice {
                 }),
                 value: "1837",
             },
-        ]
+        ];
     }
 
     /**
@@ -383,27 +385,37 @@ class diVoice {
                         },
                     },
                 },
-                // {
-                //     opcode: "voiceRecognition",
-                //     text: formatMessage({
-                //         id: "text2speech.voiceRecognitionBlock",
-                //         default: "开始[RECO_LANG]语音识别，持续[VOICE_RECO_TIME]秒",
-                //         description: "Voice recognition",
-                //     }),
-                //     blockType: BlockType.COMMAND,
-                //     arguments: {
-                //         RECO_LANG: {
-                //             type: ArgumentType.STRING,
-                //             defaultValue: "1537",
-                //             menu: "RECO_LANG"
-                //         },
-                //         VOICE_RECO_TIME: {
-                //             type: ArgumentType.NUMBER,
-                //             defaultValue: 2,
-                //             menu: "VOICE_RECO_TIME"
-                //         },
-                //     },
-                // },
+                {
+                    opcode: "voiceRecognition",
+                    text: formatMessage({
+                        id: "text2speech.voiceRecognitionBlock",
+                        default:
+                            "开始[RECO_LANG]语音识别，持续[VOICE_RECO_TIME]秒",
+                        description: "Voice recognition",
+                    }),
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        RECO_LANG: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "1537",
+                            menu: "RECO_LANG",
+                        },
+                        VOICE_RECO_TIME: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 2,
+                            menu: "VOICE_RECO_TIME",
+                        },
+                    },
+                },
+                {
+                    opcode: "voiceRecognitionResult",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "textRecognition.voiceRecognitionResult",
+                        default: "语音识别结果",
+                        description: "recogntion result",
+                    }),
+                },
             ],
             menus: {
                 VOICE_LIST: {
@@ -420,11 +432,11 @@ class diVoice {
                 },
                 RECO_LANG: {
                     acceptReporters: true,
-                    items: this._buildMenu(this.RECO_LANG_INFO)
+                    items: this._buildMenu(this.RECO_LANG_INFO),
                 },
                 VOICE_RECO_TIME: {
                     acceptReporters: true,
-                    items: this._buildMenu(this.VOICE_RECO_TIME_INFO)
+                    items: this._buildMenu(this.VOICE_RECO_TIME_INFO),
                 },
             },
         };
@@ -432,12 +444,10 @@ class diVoice {
 
     speakAndWait(args, util) {
         // Cast input to string
+        if (!this.runtime.isLogin()) return;
         let words = Cast.toString(args.WORDS);
-
         const state = this._getState(util.target);
-
         const { speaker, spd, pit, vol } = state;
-
         // Perform HTTP request to get audio file
         return (
             fetchWithTimeout(
@@ -509,8 +519,8 @@ class diVoice {
                 //         });
                 //     });
                 // })
-                .catch(err => {
-                    console.log('RequestError', state.remote_url, err)
+                .catch((err) => {
+                    console.log("RequestError", state.remote_url, err);
                 })
         );
     }
@@ -526,8 +536,48 @@ class diVoice {
     }
 
     voiceRecognition(args, util) {
-        const dev_pid = args.RECO_LANG
-        const duration = args.VOICE_RECO_TIME
+        if (!this.runtime.isLogin()) return;
+        const state = this._getState(util.target);
+        const dev_pid = args.RECO_LANG;
+        const duration = args.VOICE_RECO_TIME;
+        const uuid = uuidv4();
+        const options = {
+            uuid,
+            type: "audio",
+            duration
+        };
+        this.runtime.emit("start_web_cam", options);
+        return new Promise((resolve, reject) => {
+            this.runtime.on(uuid, (blob) => {
+                if (!blob) reject();
+                const form = new FormData();
+                form.append("file", blob);
+                form.append("format", "pcm");
+                form.append("rate", 16000);
+                form.append("dev_pid", dev_pid);
+                const xhr = new XMLHttpRequest();
+                xhr.open(
+                    "POST",
+                    this.runtime.REMOTE_HOST + this.REMOTE_URL.RECOGNITION
+                );
+                xhr.setRequestHeader("Access-Token", this.runtime.getToken());
+                xhr.send(form);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        const res = JSON.parse(xhr.response);
+                        state.voiceResult =
+                            (res.data) || [];
+                    }
+                    resolve();
+                };
+            });
+        });
+    }
+
+    voiceRecognitionResult(args, util) {
+        if (!this.runtime.isLogin()) return;
+        const state = this._getState(util.target);
+        return state.voiceResult.join("，") || "未能识别";
     }
 }
 
