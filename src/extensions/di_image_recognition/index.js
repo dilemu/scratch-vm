@@ -277,69 +277,48 @@ class DiImageRecognition {
 
     inputFile(args, util) {
         const state = this._getState(util.target);
-        // const input = document.createElement("input");
-        // input.setAttribute("style", "display: none;");
-        // input.setAttribute("id", "imageRecognition");
-        // input.setAttribute("type", "file");
-        // input.setAttribute("name", "file");
-        // document.querySelector("body").appendChild(input);
-        // input.onchange = () => {
-        //     const file = input.files[0];
-        //     state.file = file;
-        // };
-        // input.click();
-        let width = 480;
-        let height = 200;
-        let left = window.innerWidth / 2;
-        let top = window.innerHeight / 2;
-        let x = left - width / 2;
-        let y = top - height / 2;
-        const uploadWindow = window.open(
-            "",
-            null,
-            "top=" + y + ",left=" + x + ",width=" + width + ",height=" + height
-        );
-        uploadWindow.document.open();
-        uploadWindow.document.write(
-            "<html><head><title>" + "标题" + "</title></head><body>"
-        );
-        uploadWindow.document.write("<p>" + "上传学习数据" + "</p>");
-        uploadWindow.document.write('<input type="file" id="upload-files">');
-        uploadWindow.document.write(
-            '<input type="button" value="' + "上传" + '" id="upload-button">'
-        );
-        uploadWindow.document.write("</body></html>");
-        uploadWindow.document.close();
+        const input = document.createElement("input");
+        input.setAttribute("style", "display: none;");
+        input.setAttribute("id", "imageRecognition");
+        input.setAttribute("type", "file");
+        input.setAttribute("name", "file");
+        document.querySelector("body").appendChild(input);
+        input.onchange = () => {
+            const file = input.files[0];
+            state.file = file;
+            const targets = this.runtime.targets;
+            targets.forEach((target) => {
+                const sprite = target.sprite;
+                if (sprite.isStage) {
+                    console.log(sprite.costumes_.map((v) => v.name));
+                } else {
+                    // sprite.addCostumeAt({
+                    //     asset: {
 
-        return new Promise((resolve) => {
-            uploadWindow.document.getElementById("upload-button").onclick =
-                () => {
-                    this.uploadButtonClicked(uploadWindow, resolve);
-                };
-        });
-    }
-
-    uploadButtonClicked(uploadWindow, resolve) {
-        let files = uploadWindow.document.getElementById("upload-files").files;
-
-        if (files.length <= 0) {
-            alert("Please select JSON file.");
-            return false;
-        }
-
-        let fr = new FileReader();
-
-        fr.onload = (e) => {
-            console.log(e.target);
-            resolve();
+                    //     }
+                    // }, 0);
+                    const storage = this.runtime.storage;
+                    let dataFormat = storage.DataFormat.PNG;
+                    let assetType = storage.AssetType.ImageBitmap;
+                    let reader = new FileReader();
+                    let rs = reader.readAsArrayBuffer(file);
+                    let blob = null;
+                    reader.onload = (e) => {
+                        const result = reader.result;
+                        console.log(result);
+                        const asset = storage.createAsset(
+                            assetType,
+                            dataFormat,
+                            result,
+                            null,
+                            true // generate md5
+                        );
+                        console.log(asset);
+                    };
+                }
+            });
         };
-
-        fr.onloadend = (e) => {
-            uploadWindow.document.getElementById("upload-files").value = "";
-        };
-
-        fr.readAsText(files.item(0));
-        uploadWindow.close();
+        input.click();
     }
 
     inputRemote(args, util) {
@@ -376,7 +355,10 @@ class DiImageRecognition {
                                 "POST",
                                 this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE
                             );
-                            xhr.setRequestHeader("Access-Token", this.runtime.getToken());
+                            xhr.setRequestHeader(
+                                "Access-Token",
+                                this.runtime.getToken()
+                            );
                             xhr.send(form);
                             xhr.onreadystatechange = function () {
                                 if (xhr.readyState == 4) {
@@ -407,8 +389,14 @@ class DiImageRecognition {
                     const form = new FormData();
                     form.append("file", blob);
                     const xhr = new XMLHttpRequest();
-                    xhr.open("POST", this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE);
-                    xhr.setRequestHeader("Access-Token", this.runtime.getToken());
+                    xhr.open(
+                        "POST",
+                        this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE
+                    );
+                    xhr.setRequestHeader(
+                        "Access-Token",
+                        this.runtime.getToken()
+                    );
                     xhr.send(form);
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4) {

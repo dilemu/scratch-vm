@@ -196,6 +196,9 @@ class VirtualMachine extends EventEmitter {
         this.runtime.on(Runtime.GUI_DIALOG, data => {
             this.emit(Runtime.GUI_DIALOG, data);
         });
+        this.runtime.on("addSprite", input => {
+            this.addSprite(input);
+        })
 
         this.extensionManager = new ExtensionManager(this.runtime);
 
