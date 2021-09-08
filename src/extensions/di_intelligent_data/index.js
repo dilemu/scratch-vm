@@ -353,10 +353,6 @@ class IntelligentRecognition {
     getWeatherAll(city, unit = "m") {
         return new Promise((resolve, reject) => {
             const location = city.value;
-            if(!location.trim()) {
-                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
-                reject("请选择城市！")
-            }
             fetchWithTimeout(
                 this.runtime.REMOTE_HOST + this.REMOTE_URL.WEATHER_DAY,
                 {
@@ -388,6 +384,10 @@ class IntelligentRecognition {
         const state = this._getState(util.target);
         const location = args.CITY;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             this.getWeatherAll(location, "m")
                 .then((data) => {
                     resolve(
@@ -405,6 +405,10 @@ class IntelligentRecognition {
         const state = this._getState(util.target);
         const location = args.CITY;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             this.getWeatherAll(location, "m")
                 .then((data) => {
                     resolve(
@@ -422,6 +426,10 @@ class IntelligentRecognition {
         const state = this._getState(util.target);
         const location = args.CITY;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             this.getWeatherAll(location, "i")
                 .then((data) => {
                     resolve(
@@ -439,6 +447,10 @@ class IntelligentRecognition {
         const state = this._getState(util.target);
         const location = args.CITY;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             this.getWeatherAll(location, "i")
                 .then((data) => {
                     resolve(
@@ -455,6 +467,10 @@ class IntelligentRecognition {
         if (!this.runtime.isLogin()) return;
         const location = args.CITY;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             this.getWeatherAll(location)
                 .then((data) => {
                     resolve(data.humidity);
@@ -469,6 +485,10 @@ class IntelligentRecognition {
         if (!this.runtime.isLogin()) return;
         const location = args.CITY;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             this.getWeatherAll(location)
                 .then((data) => {
                     resolve(data.textDay);
@@ -484,8 +504,8 @@ class IntelligentRecognition {
         const location = args.CITY;
         const index = args.INDEX;
         return new Promise((resolve) => {
-            if(!location.trim()) {
-                this.runtime.emit("MESSAGE_INFO", "未登录！");
+            if(!location) {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
                 reject("请选择城市！")
             }
             fetchWithTimeout(
@@ -493,7 +513,7 @@ class IntelligentRecognition {
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        location,
+                        location: location.value,
                         unit: "m",
                     }),
                     headers: {
@@ -543,6 +563,10 @@ class IntelligentRecognition {
         const location = args.CITY;
         const unitIndex = args.UNIT;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             this.getWeatherAll(location)
                 .then((data) => {
                     const sunriseTime = data.sunrise.split(":")
@@ -559,6 +583,10 @@ class IntelligentRecognition {
         const location = args.CITY;
         const unitIndex = args.UNIT;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             this.getWeatherAll(location)
                 .then((data) => {
                     const sunsetTime = data.sunset.split(":")
@@ -574,6 +602,10 @@ class IntelligentRecognition {
         if (!this.runtime.isLogin()) return;
         const location = args.CITY;
         return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
             fetchWithTimeout(
                 this.runtime.REMOTE_HOST + this.REMOTE_URL.WORLD_TIME,
                 {
