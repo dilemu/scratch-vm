@@ -59,7 +59,8 @@ class WordProcessing {
         return {
             lexicalResult: [],
             similarResult: null,
-            chineseQAResult: {},
+            chineseQAResult: "",
+            chineseQAResult1: "",
             correctionResult: {},
             addressResult: {},
         };
@@ -615,8 +616,17 @@ class WordProcessing {
             )
                 .then((response) => response.json())
                 .then((data) => {
-                    if (data.code === 0) state.chineseQAResult = data.data;
-                    else state.chineseQAResult = {};
+                    if (data.code === 0) {
+                         const ramIndex = Math.round(
+                             Math.random() * data.data.answer.length - 1
+                         );
+                         if (TYPE) state.chineseQAResult1 = data.data.answer[ramIndex];
+                         else state.chineseQAResult = data.data.answer[ramIndex];
+                    }
+                    else {
+                        if (TYPE) state.chineseQAResult1 = "";
+                        else state.chineseQAResult = "";
+                    }
                     resolve();
                 })
                 .catch((err) => {
@@ -628,11 +638,7 @@ class WordProcessing {
 
     chineseQAResult(args, util) {
         const state = this._getState(util.target);
-        return (
-            (state.chineseQAResult.answer &&
-                state.chineseQAResult.answer.join("\n")) ||
-            ""
-        );
+        return state.chineseQAResult || "";
     }
 
     chineseQA1(args, util) {
@@ -640,7 +646,8 @@ class WordProcessing {
     }
 
     chineseQAResult1(args, util) {
-        return this.chineseQAResult(args, util);
+        const state = this._getState(util.target);
+        return state.chineseQAResult1 || "";
     }
 
     correction(args, util) {
