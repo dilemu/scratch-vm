@@ -8,8 +8,8 @@ const fetchWithTimeout = require("../../util/fetch-with-timeout");
 const log = require("../../util/log");
 const { v4: uuidv4 } = require("uuid");
 
-const menuIconURI = null;
-const blockIconURI = null;
+const menuIconURI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAIVJREFUaEPt0rENACAMxMBk/6UZ4goUyfR+gc3O8bPH7z894HfBClQADfSFUCDjFWCFOFABFMh4BVghDlQABTJeAVaIAxVAgYxXgBXiQAVQIOMVYIU4UAEUyHgFWCEOVAAFMl4BVogDFUCBjFeAFeJABVAg4xVghThQARTIeAVYIQ6cL/AAmvUAMfJYo3UAAAAASUVORK5CYII=";
+const blockIconURI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAYAAAAehFoBAAAAAXNSR0IArs4c6QAAA1JJREFUWEftmD1oFEEUx//v1g+QREgliMQ2WkhQsVCboGgSRQvNGRRtTHZnUCuxU0OIVmKlMrMbUwW/LiIo5BIUO7UJYkQwtcHUAZNGze6TPS5yht3bm8smXuC2Wna+fvvem/f+M4Q19tAa40UdeKU9Vrfwf7Ww53kdvu/3E1ErM68vhSGi3wDuCSGumkBqre8CuBI1HzNPWpbVZ9v2WNycsSFRhM2XgyGiGSHENhNgpdQMgK3lxliW1RkHHQustZ5g5r0AAiJ6DWCudBFm/k1Ew0KI8dLvuVyuYXZ2tjX81tTUNJnNZudL27XW7cx8noj+8RiARmY+AiADYEJKuS/qp8oB/wrdRkTjQoiOSqyotRbMfAdAQ7H/PBFdE0LoCsePMXN7GG5CiA1GwEopDgcQ0YgQIpu0oOd5J3zffxnVz7Ksk7Ztv0qaQ2udY+ausJ+UMtKYsRY2BVZKvQewPwbqg5TyQE0Ba61/MHNjpBuJ5oQQm2sKWCn1FcCOGKgpKeXOFQXWWhc2HYDHUspzFSw2wMzXY/oNSClvJs2hlHoE4GxVmy5M8MzcTUQXl6auqIXz+fzG6enpUWY+tKTAvG1ubj7W2dn5Mwm4mPKGiOhpXEFKVUswM3medzoIgoMhXCaTeWfb9nMiKmScNB5j4DKJ34gnrvAkTWIMXElpTVp0sb2a0m4MHCdeKoUsga1KPBkDJ4G5rtsVBEGuGMNZx3FGksaYtKcKHG4613VvMHN/CEFEfY7j3CKiwASqXN/UgAcHB7csLCyMAtizJK19tizreG9v7/c0oFMBZuaM67ofmbkgKyOeqZaWll1tbW0Ly4VOBdjzvG7f958Uw+ANEfWE70EQDAE4HL5blnXBtu3hmgDWWt9n5kvFjbbdcZzp8N113eYgCL4Vf+SBEOJyrQDH6lhTmZr0Q6mERDnhvWrAxQJxBkBPkvhJCzgs+wAeAnhmLH5M5GVawMuSlyauTAt41c50aw64nCvTCq2/oikujRiGRHg5EnlSMDm5LCskFi1jcpGSlEOT2pVS4dVYR7VnuqquqpKgypxYNjHzUQDrAHySUu6OmqsmLwOJ6JQQ4oURcNh5ta9bAXwBcDsOtqBJklxYa+114JX2SN3CdQsvscAfRWU+Sx9h3pQAAAAASUVORK5CYII=";
 
 const REMOTE_URL = {
     GESTURE: "/api/body/gesture/recognition",
@@ -262,9 +262,8 @@ class diBodyRecognition {
         return {
             id: "diBodyRecognition",
             name: "人体识别",
-            color1: "#0079FF",
-            color2: "#0061CC",
-            color3: "#3373CC",
+            color1: "#FFA279",
+            color2: "#FFA279",
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
