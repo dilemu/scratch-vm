@@ -66,7 +66,7 @@ class diVoice {
             spd: 5,
             pit: 5,
             vol: 5,
-            voiceResult: []
+            voiceResult: [],
         };
     }
 
@@ -371,10 +371,25 @@ class diVoice {
                     },
                 },
                 {
+                    opcode: "speak",
+                    text: formatMessage({
+                        id: "text2speech.speakBlock",
+                        default: "speak [WORDS]",
+                        description: "Speak some words.",
+                    }),
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        WORDS: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "你好",
+                        },
+                    },
+                },
+                {
                     opcode: "speakAndWait",
                     text: formatMessage({
                         id: "text2speech.speakAndWaitBlock",
-                        default: "speak [WORDS]",
+                        default: "朗读 [WORDS]直到结束",
                         description: "Speak some words.",
                     }),
                     blockType: BlockType.COMMAND,
@@ -442,6 +457,58 @@ class diVoice {
         };
     }
 
+    speak(args, util) {
+        // Cast input to string
+        if (!this.runtime.isLogin()) return;
+        let words = Cast.toString(args.WORDS);
+        const state = this._getState(util.target);
+        const { speaker, spd, pit, vol } = state;
+        // Perform HTTP request to get audio file
+        return fetchWithTimeout(
+            this.runtime.REMOTE_HOST + this.REMOTE_URL.SPEAK,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    str: words,
+                    per: speaker,
+                    spd,
+                    pit,
+                    vol,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Token": this.runtime.getToken(),
+                },
+            },
+            serverTimeoutMs
+        )
+            .then((res) => {
+                if (res.status !== 200) {
+                    throw new Error(
+                        `HTTP ${res.status} error reaching translation service`
+                    );
+                }
+
+                return res.arrayBuffer();
+            })
+            .then((buffer) => {
+                var audioCtx = new AudioContext();
+
+                audioCtx.decodeAudioData(buffer, function (audioBuffer) {
+                    // audioBuffer就是AudioBuffer
+                    // 创建AudioBufferSourceNode对象
+                    var source = audioCtx.createBufferSource();
+                    // 设置AudioBufferSourceNode对象的buffer为复制的3秒AudioBuffer对象
+                    source.buffer = audioBuffer;
+                    // 这一句是必须的，表示结束，没有这一句没法播放，没有声音
+                    // 这里直接结束，实际上可以对结束做一些特效处理
+                    source.connect(audioCtx.destination);
+                    // 资源开始播放
+                    source.start();
+                });
+            });
+    }
+
     speakAndWait(args, util) {
         // Cast input to string
         if (!this.runtime.isLogin()) return;
@@ -449,80 +516,78 @@ class diVoice {
         const state = this._getState(util.target);
         const { speaker, spd, pit, vol } = state;
         // Perform HTTP request to get audio file
-        return (
-            fetchWithTimeout(
-                this.runtime.REMOTE_HOST + this.REMOTE_URL.SPEAK,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        str: words,
-                        per: speaker,
-                        spd,
-                        pit,
-                        vol,
-                    }),
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Token": this.runtime.getToken(),
-                    },
+        return fetchWithTimeout(
+            this.runtime.REMOTE_HOST + this.REMOTE_URL.SPEAK,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    str: words,
+                    per: speaker,
+                    spd,
+                    pit,
+                    vol,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Token": this.runtime.getToken(),
                 },
-                serverTimeoutMs
-            )
-                .then((res) => {
-                    if (res.status !== 200) {
-                        throw new Error(
-                            `HTTP ${res.status} error reaching translation service`
-                        );
-                    }
+            },
+            serverTimeoutMs
+        )
+            .then((res) => {
+                if (res.status !== 200) {
+                    throw new Error(
+                        `HTTP ${res.status} error reaching translation service`
+                    );
+                }
 
-                    return res.arrayBuffer();
-                })
-                .then((buffer) => {
-                    var audioCtx = new AudioContext();
+                return res.arrayBuffer();
+            })
+            .then((buffer) => {
+                // var audioCtx = new AudioContext();
 
-                    audioCtx.decodeAudioData(buffer, function (audioBuffer) {
-                        // audioBuffer就是AudioBuffer
-                        // 创建AudioBufferSourceNode对象
-                        var source = audioCtx.createBufferSource();
-                        // 设置AudioBufferSourceNode对象的buffer为复制的3秒AudioBuffer对象
-                        source.buffer = audioBuffer;
-                        // 这一句是必须的，表示结束，没有这一句没法播放，没有声音
-                        // 这里直接结束，实际上可以对结束做一些特效处理
-                        source.connect(audioCtx.destination);
-                        // 资源开始播放
-                        source.start();
+                // audioCtx.decodeAudioData(buffer, function (audioBuffer) {
+                //     // audioBuffer就是AudioBuffer
+                //     // 创建AudioBufferSourceNode对象
+                //     var source = audioCtx.createBufferSource();
+                //     // 设置AudioBufferSourceNode对象的buffer为复制的3秒AudioBuffer对象
+                //     source.buffer = audioBuffer;
+                //     // 这一句是必须的，表示结束，没有这一句没法播放，没有声音
+                //     // 这里直接结束，实际上可以对结束做一些特效处理
+                //     source.connect(audioCtx.destination);
+                //     // 资源开始播放
+                //     source.start();
+                // });
+                // Play the sound
+                const sound = {
+                    data: {
+                        buffer,
+                    },
+                };
+                return this.runtime.audioEngine.decodeSoundPlayer(sound);
+            })
+            .then((soundPlayer) => {
+                this._soundPlayers.set(soundPlayer.id, soundPlayer);
+
+                soundPlayer.setPlaybackRate(0.89);
+
+                // Increase the volume
+                const engine = this.runtime.audioEngine;
+                const chain = engine.createEffectChain();
+                chain.set("volume", 250);
+                soundPlayer.connect(chain);
+
+                soundPlayer.play();
+                return new Promise((resolve) => {
+                    soundPlayer.on("stop", () => {
+                        this._soundPlayers.delete(soundPlayer.id);
+                        resolve();
                     });
-                    // Play the sound
-                    // const sound = {
-                    //     data: {
-                    //         buffer,
-                    //     },
-                    // };
-                    // return this.runtime.audioEngine.decodeSoundPlayer(sound);
-                })
-                // .then((soundPlayer) => {
-                //     this._soundPlayers.set(soundPlayer.id, soundPlayer);
-
-                //     soundPlayer.setPlaybackRate(playbackRate);
-
-                //     // Increase the volume
-                //     const engine = this.runtime.audioEngine;
-                //     const chain = engine.createEffectChain();
-                //     chain.set("volume", 250);
-                //     soundPlayer.connect(chain);
-
-                //     soundPlayer.play();
-                //     return new Promise((resolve) => {
-                //         soundPlayer.on("stop", () => {
-                //             this._soundPlayers.delete(soundPlayer.id);
-                //             resolve();
-                //         });
-                //     });
-                // })
-                .catch((err) => {
-                    console.log("RequestError", state.remote_url, err);
-                })
-        );
+                });
+            })
+            .catch((err) => {
+                console.log("RequestError", state.remote_url, err);
+            });
     }
 
     setSpeaker(args, util) {
@@ -544,7 +609,7 @@ class diVoice {
         const options = {
             uuid,
             type: "audio",
-            duration
+            duration,
         };
         this.runtime.emit("start_web_cam", options);
         return new Promise((resolve, reject) => {
@@ -565,8 +630,7 @@ class diVoice {
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
                         const res = JSON.parse(xhr.response);
-                        state.voiceResult =
-                            (res.data) || [];
+                        state.voiceResult = res.data || [];
                     }
                     resolve();
                 };
