@@ -57,6 +57,7 @@ class DiImageRecognition {
         return {
             remote_url: "",
             result: "待识别",
+            uploadFile: null
         };
     }
 
@@ -196,9 +197,8 @@ class DiImageRecognition {
                 default: "图像识别",
                 description: "Label for the hello world extension category",
             }),
-            color1: "#0079FF",
-            color2: "#0061CC",
-            color3: "#3373CC",
+            color1: "#DF7CFA",
+            color2: "#DF7CFA",
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
@@ -276,49 +276,17 @@ class DiImageRecognition {
     }
 
     inputFile(args, util) {
+        if (!this.runtime.isLogin()) return;
+        const uuid = uuidv4();
         const state = this._getState(util.target);
-        const input = document.createElement("input");
-        input.setAttribute("style", "display: none;");
-        input.setAttribute("id", "imageRecognition");
-        input.setAttribute("type", "file");
-        input.setAttribute("name", "file");
-        document.querySelector("body").appendChild(input);
-        input.onchange = () => {
-            const file = input.files[0];
-            state.file = file;
-            const targets = this.runtime.targets;
-            targets.forEach((target) => {
-                const sprite = target.sprite;
-                if (sprite.isStage) {
-                    console.log(sprite.costumes_.map((v) => v.name));
-                } else {
-                    // sprite.addCostumeAt({
-                    //     asset: {
-
-                    //     }
-                    // }, 0);
-                    const storage = this.runtime.storage;
-                    let dataFormat = storage.DataFormat.PNG;
-                    let assetType = storage.AssetType.ImageBitmap;
-                    let reader = new FileReader();
-                    let rs = reader.readAsArrayBuffer(file);
-                    let blob = null;
-                    reader.onload = (e) => {
-                        const result = reader.result;
-                        console.log(result);
-                        const asset = storage.createAsset(
-                            assetType,
-                            dataFormat,
-                            result,
-                            null,
-                            true // generate md5
-                        );
-                        console.log(asset);
-                    };
-                }
+        this.runtime.emit("start_upload_file", uuid);
+        return new Promise((resolve) => {
+            this.runtime.on(uuid, (file) => {
+                console.log(file)
+                state.uploadFile = file;
+                resolve();
             });
-        };
-        input.click();
+        });
     }
 
     inputRemote(args, util) {
@@ -375,6 +343,31 @@ class DiImageRecognition {
                         });
                 });
             }
+        } else if (state.uploadFile) {
+            return new Promise((resolve, reject) => {
+                    if (!state.uploadFile) reject();
+                    const form = new FormData();
+                    form.append("file", state.uploadFile);
+                    const xhr = new XMLHttpRequest();
+                    xhr.open(
+                        "POST",
+                        this.runtime.REMOTE_HOST + args.RECOGNITION_TYPE
+                    );
+                    xhr.setRequestHeader(
+                        "Access-Token",
+                        this.runtime.getToken()
+                    );
+                    xhr.send(form);
+                    xhr.onreadystatechange = function () {
+                        state.uploadFile = null
+                        if (xhr.readyState == 4) {
+                            const res = JSON.parse(xhr.response);
+                            state.result =
+                                (res.data && res.data.name) || "未能识别";
+                        }
+                        resolve();
+                    };
+            });
         } else {
             const uuid = uuidv4();
             const options = {
