@@ -503,8 +503,8 @@ class IntelligentRecognition {
         if (!this.runtime.isLogin()) return;
         const location = args.CITY;
         const index = args.INDEX;
-        return new Promise((resolve) => {
-            if(!location) {
+        return new Promise((resolve, reject) => {
+            if(typeof location !== 'object') {
                 this.runtime.emit("MESSAGE_INFO", "请选择城市！");
                 reject("请选择城市！")
             }
