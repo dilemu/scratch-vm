@@ -552,7 +552,7 @@ class WordProcessing {
     emoResult(args, util) {
         if (!this.runtime.isLogin()) return;
         const state = this._getState(util.target);
-        return (state.emoResult && state.emoResult[sentiment]) || "未识别";
+        return (state.emoResult && state.emoResult.sentiment) || "未识别";
     }
 
     wordSimilar(args, util) {

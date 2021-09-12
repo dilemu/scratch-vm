@@ -149,6 +149,20 @@ class diBodyRecognition {
                 }),
                 value: "lower_color",
             },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.character_list.upper_wear_fg",
+                    default: "上身服饰细分类",
+                }),
+                value: "upper_wear_fg",
+            },
+            {
+                name: formatMessage({
+                    id: "imageRecognition.character_list.lower_wear",
+                    default: "下身服饰",
+                }),
+                value: "lower_wear",
+            },
         ];
     }
 
@@ -288,7 +302,7 @@ class diBodyRecognition {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: "imageRecognition.reportGesture",
-                        default: "手势识别",
+                        default: "手势识别结果",
                         description: "reportGesture",
                     }),
                 },
@@ -313,7 +327,7 @@ class diBodyRecognition {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: "imageRecognition.reportEmotion",
-                        default: "情绪识别",
+                        default: "情绪识别结果",
                         description: "reportEmotion",
                     }),
                 },
@@ -338,7 +352,7 @@ class diBodyRecognition {
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: "imageRecognition.reportBodyNum",
-                        default: "人流量",
+                        default: "人流量识别结果",
                         description: "reportBodyNum",
                     }),
                 },

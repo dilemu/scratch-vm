@@ -373,7 +373,7 @@ class diVoice {
                     opcode: "speak",
                     text: formatMessage({
                         id: "text2speech.speakBlock",
-                        default: "speak [WORDS]",
+                        default: "朗读 [WORDS]",
                         description: "Speak some words.",
                     }),
                     blockType: BlockType.COMMAND,
@@ -387,7 +387,7 @@ class diVoice {
                 {
                     opcode: "speakAndWait",
                     text: formatMessage({
-                        id: "text2speech.speakAndWaitBlock",
+                        id: "text2speech.speakWaitBlock",
                         default: "朗读 [WORDS]直到结束",
                         description: "Speak some words.",
                     }),
