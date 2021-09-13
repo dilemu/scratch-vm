@@ -1,239 +1,73 @@
-const Runtime = require('../../engine/runtime');
+// create by scratch3-extension generator
+const ArgumentType = require("../../extension-support/argument-type");
+const BlockType = require("../../extension-support/block-type");
+const Clone = require("../../util/clone");
+const Cast = require("../../util/cast");
+const formatMessage = require("format-message");
+const fetchWithTimeout = require("../../util/fetch-with-timeout");
+const log = require("../../util/log");
 
-const ArgumentType = require('../../extension-support/argument-type');
-const BlockType = require('../../extension-support/block-type');
-const Clone = require('../../util/clone');
-const Cast = require('../../util/cast');
-const Video = require('../../io/video');
-const formatMessage = require('format-message');
-const tf = require('@tensorflow/tfjs');
-const mobilenetModule = require('./mobilenet.js');
-const knnClassifier = require('@tensorflow-models/knn-classifier');
-
-/**
- * Sensor attribute video sensor block should report.
- * @readonly
- * @enum {string}
- */
-const SensingAttribute = {
-    /** The amount of motion. */
-    MOTION: 'motion',
-
-    /** The direction of the motion. */
-    DIRECTION: 'direction'
-};
+const menuIconURI =
+    "data:image/png;base64,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";
+const blockIconURI =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAsCAYAAAAehFoBAAAAAXNSR0IArs4c6QAAAZ1JREFUWEftmDFPhDAUx/vKRC7hC9xk4q1OzsZVR01YSTSBMvgVHPwSJSQuDA4Mjudo4uxiHNXFuLqQyGACNZgj4bBwFMoZkscGLa+//Pvva/uATOyBifESBB57xlDhf1OYcy4aBn/1fX+hA4xz/kII2ZXF8n1fOvuNlpgsMKX0EgAeSxXyPP9ijD3oUDgIggNK6ayMJYTYz/P8qnjvrbBhGMeu697pANwUIwzDoyzLlgi8Sam+7UMVLlYwAYDzqmfjODaSJNnpC1X9z7Ksd9u2v8tvhaeFENcrS0gzkfLGwTmfE0I+dABTSvc8z3tWiYXAKmqhwjK1oiiapWl61qDkQghxUW0DgGIRPcn6m6Z54zjOp8qsKHu4LTjn/JAQcl8DPmWM3apAtfVFYFS45g+0BFoCLVFRAPOwZAfBLIFZomuWWBU5/lyRxjz8DLoilYUUlWv+0Cwx9BL6W6pSBJ4DwEnteLn0PO+ty/Fy68BdoNr6aAGeXKlKoghWL2U2US4GDvXjWP9r3ZrHglzLOtsYROcYqLBONWWxJqfwD8g1JTxCUUorAAAAAElFTkSuQmCC";
 
 /**
- * Subject video sensor block should report for.
- * @readonly
- * @enum {string}
+ * How long to wait in ms before timing out requests to translate server.
+ * @type {int}
  */
-const SensingSubject = {
-    /** The sensor traits of the whole stage. */
-    STAGE: 'Stage',
+const serverTimeoutMs = 10000; // 10 seconds (chosen arbitrarily).
 
-    /** The senosr traits of the area overlapped by this sprite. */
-    SPRITE: 'this sprite'
-};
+const REMOTE_URL = {};
 
-/**
- * States the video sensing activity can be set to.
- * @readonly
- * @enum {string}
- */
-const VideoState = {
-    /** Video turned off. */
-    OFF: 'off',
-
-    /** Video turned on with default y axis mirroring. */
-    ON: 'on',
-
-    /** Video turned on without default y axis mirroring. */
-    ON_FLIPPED: 'on-flipped'
-};
-
-let typeArr = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10'
-]
-
-/**
- * Class for the motion-related blocks in Scratch 3.0
- * @param {Runtime} runtime - the runtime instantiating this block package.
- * @constructor
- */
-class Scratch3Knn {
+class MachineLearning {
     constructor(runtime) {
-        this.knn = null
-        this.trainTypes = typeArr.map(item => {
-            return 'label' + item
-        })
-        this.knnInit()
-        /**
-         * The runtime instantiating this block package.
-         * @type {Runtime}
-         */
         this.runtime = runtime;
-
-        /**
-         * The last millisecond epoch timestamp that the video stream was
-         * analyzed.
-         * @type {number}
-         */
-        this._lastUpdate = null;
-        this.KNN_INTERVAL = 1000
-        if (this.runtime.ioDevices) {
-            // Clear target motion state values when the project starts.
-            this.runtime.on(Runtime.PROJECT_RUN_START, this.reset.bind(this));
-
-            // Kick off looping the analysis logic.
-            // this._loop();
-
-            // Configure the video device with values from a globally stored
-            // location.
-            this.setVideoTransparency({
-                TRANSPARENCY: 10
-            });
-            this.videoToggle({
-                VIDEO_STATE: this.globalVideoState
-            });
-        }
-
-        setInterval(async () => {
-            if (this.globalVideoState === VideoState.ON) {
-                await this.gotResult()
-                console.log('knn result:', this.trainResult)
-            }
-        }, this.KNN_INTERVAL)
+        // communication related
+        this.comm = runtime.ioDevices.comm;
+        this.session = null;
+        this.runtime.registerPeripheralExtension("diMachineLearning", this);
+        // session callbacks
+        this.reporter = null;
+        this.onmessage = this.onmessage.bind(this);
+        // string op
+        this.decoder = new TextDecoder();
+        this.lineBuffer = "";
     }
 
     /**
-     * After analyzing a frame the amount of milliseconds until another frame
-     * is analyzed.
-     * @type {number}
-     */
-    static get INTERVAL() {
-        return 33;
-    }
-
-    /**
-     * Dimensions the video stream is analyzed at after its rendered to the
-     * sample canvas.
-     * @type {Array.<number>}
-     */
-    static get DIMENSIONS() {
-        return [480, 360];
-    }
-
-    /**
-     * The key to load & store a target's motion-related state.
+     * The key to load & store a target's pen-related state.
      * @type {string}
      */
     static get STATE_KEY() {
-        return 'Scratch.videoSensing';
+        return "Di.MachineLearning";
     }
-
     /**
-     * The default motion-related state, to be used when a target has no existing motion state.
-     * @type {MotionState}
+     * The default state, to be used when a target has no existing state.
+     * @type {HelloWorldState}
      */
-    static get DEFAULT_MOTION_STATE() {
-        return {
-            motionFrameNumber: 0,
-            motionAmount: 0,
-            motionDirection: 0
-        };
+    static get DEFAULT_IMAGERECOGNITION_STATE() {
+        return {};
+    }
+
+    get REMOTE_URL() {
+        return REMOTE_URL;
     }
 
     /**
-     * The transparency setting of the video preview stored in a value
-     * accessible by any object connected to the virtual machine.
-     * @type {number}
-     */
-    get globalVideoTransparency() {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            return stage.videoTransparency;
-        }
-        return 10;
-    }
-
-    set globalVideoTransparency(transparency) {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            stage.videoTransparency = transparency;
-        }
-        return transparency;
-    }
-
-    /**
-     * The video state of the video preview stored in a value accessible by any
-     * object connected to the virtual machine.
-     * @type {number}
-     */
-    get globalVideoState() {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            return stage.videoState;
-        }
-        return VideoState.ON;
-    }
-
-    set globalVideoState(state) {
-        const stage = this.runtime.getTargetForStage();
-        if (stage) {
-            stage.videoState = state;
-        }
-        return state;
-    }
-
-    /**
-     * Reset the extension's data motion detection data. This will clear out
-     * for example old frames, so the first analyzed frame will not be compared
-     * against a frame from before reset was called.
-     */
-    reset() {
-        const targets = this.runtime.targets;
-        for (let i = 0; i < targets.length; i++) {
-            const state = targets[i].getCustomState(Scratch3Knn .STATE_KEY);
-            if (state) {
-                state.motionAmount = 0;
-                state.motionDirection = 0;
-            }
-        }
-    }
-
-    /**
-     * Occasionally step a loop to sample the video, stamp it to the preview
-     * skin, and add a TypedArray copy of the canvas's pixel data.
+     * @param {Target} target - collect  state for this target.
+     * @returns {HelloWorldState} the mutable state associated with that target. This will be created if necessary.
      * @private
      */
-    _loop() {
-        setTimeout(this._loop.bind(this), Math.max(this.runtime.currentStepTime, Scratch3Knn .INTERVAL));
-
-        // Add frame to detector
-        const time = Date.now();
-        if (this._lastUpdate === null) {
-            this._lastUpdate = time;
+    _getState(target) {
+        let state = target.getCustomState(MachineLearning.STATE_KEY);
+        if (!state) {
+            state = Clone.simple(
+                MachineLearning.DEFAULT_IMAGERECOGNITION_STATE
+            );
+            target.setCustomState(MachineLearning.STATE_KEY, state);
         }
-        const offset = time - this._lastUpdate;
-        if (offset > Scratch3Knn .INTERVAL) {
-            const frame = this.runtime.ioDevices.video.getFrame({
-                format: Video.FORMAT_IMAGE_DATA,
-                dimensions: Scratch3Knn .DIMENSIONS
-            });
-            if (frame) {
-                this._lastUpdate = time;
-            }
-        }
+        return state;
     }
 
     /**
@@ -254,661 +88,47 @@ class Scratch3Knn {
         });
     }
 
-    /**
-     * @param {Target} target - collect motion state for this target.
-     * @returns {MotionState} the mutable motion state associated with that
-     *   target. This will be created if necessary.
-     * @private
-     */
-    _getMotionState(target) {
-        let motionState = target.getCustomState(Scratch3Knn .STATE_KEY);
-        if (!motionState) {
-            motionState = Clone.simple(Scratch3Knn .DEFAULT_MOTION_STATE);
-            target.setCustomState(Scratch3Knn .STATE_KEY, motionState);
+    onmessage(data) {
+        const dataStr = this.decoder.decode(data);
+        this.lineBuffer += dataStr;
+        if (this.lineBuffer.indexOf("\n") !== -1) {
+            const lines = this.lineBuffer.split("\n");
+            this.lineBuffer = lines.pop();
+            for (const l of lines) {
+                if (this.reporter) {
+                    const { parser, resolve } = this.reporter;
+                    resolve(parser(l));
+                }
+            }
         }
-        return motionState;
     }
 
-    static get SensingAttribute() {
-        return SensingAttribute;
-    }
-
-    /**
-     * An array of choices of whether a reporter should return the frame's
-     * motion amount or direction.
-     * @type {object[]} an array of objects
-     * @param {string} name - the translatable name to display in sensor
-     *   attribute menu
-     * @param {string} value - the serializable value of the attribute
-     */
-    get ATTRIBUTE_INFO() {
-        return [
-            {
-                name: 'motion',
-                value: SensingAttribute.MOTION
-            },
-            {
-                name: 'direction',
-                value: SensingAttribute.DIRECTION
-            }
-        ];
-    }
-
-    static get SensingSubject() {
-        return SensingSubject;
-    }
-
-    /**
-     * An array of info about the subject choices.
-     * @type {object[]} an array of objects
-     * @param {string} name - the translatable name to display in the subject menu
-     * @param {string} value - the serializable value of the subject
-     */
-    get SUBJECT_INFO() {
-        return [
-            {
-                name: 'stage',
-                value: SensingSubject.STAGE
-            },
-            {
-                name: 'sprite',
-                value: SensingSubject.SPRITE
-            }
-        ];
-    }
-
-    /**
-     * States the video sensing activity can be set to.
-     * @readonly
-     * @enum {string}
-     */
-    static get VideoState() {
-        return VideoState;
-    }
-
-    /**
-     * An array of info on video state options for the "turn video [STATE]" block.
-     * @type {object[]} an array of objects
-     * @param {string} name - the translatable name to display in the video state menu
-     * @param {string} value - the serializable value stored in the block
-     */
-    get VIDEO_STATE_INFO () {
-        return [
-            {
-                name: formatMessage({
-                    id: 'videoSensing.off',
-                    default: 'off',
-                    description: 'Option for the "turn video [STATE]" block'
-                }),
-                value: VideoState.OFF
-            },
-            {
-                name: formatMessage({
-                    id: 'videoSensing.on',
-                    default: 'on',
-                    description: 'Option for the "turn video [STATE]" block'
-                }),
-                value: VideoState.ON
-            },
-            {
-                name: formatMessage({
-                    id: 'videoSensing.onFlipped',
-                    default: 'on flipped',
-                    description: 'Option for the "turn video [STATE]" block that causes the video to be flipped' +
-                        ' horizontally (reversed as in a mirror)'
-                }),
-                value: VideoState.ON_FLIPPED
-            }
-        ];
-    }
-
-
-    /**
-     * @returns {object} metadata for this extension and its blocks.
-     */
     getInfo() {
         return {
-            id: 'diMachineLeaning',
-            name: 'KNN Classifier',
+            id: "diMachineLearning",
+            name: "机器学习",
+            color1: "#2D589A",
+            color2: "#2D589A",
+            menuIconURI: menuIconURI,
+            blockIconURI: blockIconURI,
             blocks: [
                 {
-                    opcode: 'videoToggle',
+                    callbackKey: "trainModel",
+                    blockType: BlockType.BUTTON,
                     text: formatMessage({
-                        id: 'videoSensing.videoToggle',
-                        default: 'turn video [VIDEO_STATE]',
-                        description: 'Controls display of the video preview layer'
+                        id: "textRecognition.trainModel",
+                        default: "训练模型",
+                        description: "trainModel",
                     }),
-                    arguments: {
-                        VIDEO_STATE: {
-                            type: ArgumentType.NUMBER,
-                            menu: 'VIDEO_STATE',
-                            defaultValue: VideoState.ON
-                        }
-                    }
                 },
-                {
-                    opcode: 'setVideoTransparency',
-                    text: formatMessage({
-                        id: 'videoSensing.setVideoTransparency',
-                        default: 'set video transparency to [TRANSPARENCY]',
-                        description: 'Controls transparency of the video preview layer'
-                    }),
-                    arguments: {
-                        TRANSPARENCY: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 10
-                        }
-                    }
-                },
-                {
-                    opcode: 'isloaded',
-                    blockType: BlockType.BOOLEAN,
-                    text: formatMessage({
-                        id: 'knn.isloaded',
-                        default: 'is loaded',
-                        description: 'knn is loaded'
-                    })
-                },
-                {
-                    opcode: 'trainA',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'knn.trainA',
-                        default: 'Train 1 [STRING]',
-                        description: 'Train A'
-                    }),
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label1"
-                        }
-                    }
-                },
-                {
-                    opcode: 'trainB',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'knn.trainB',
-                        default: 'Train 2 [STRING]',
-                        description: 'Train B'
-                    }),
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label2"
-                        }
-                    }
-                },
-                {
-                    opcode: 'trainC',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'knn.trainC',
-                        default: 'Train 3 [STRING]',
-                        description: 'Train C'
-                    }),
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label3"
-                        }
-                    }
-                },
-                {
-                    opcode: 'train',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'knn.train',
-                        default: 'Train label [type] [STRING]',
-                        description: 'Train'
-                    }),
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label4"
-                        },
-                        type: {
-                            type: ArgumentType.STRING,
-                            menu: 'typemenu',
-                            defaultValue: "4"
-                        }
-                    }
-                },
-                {
-                    opcode: 'addTrainType',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'knn.addTrainType',
-                        default: 'add train type',
-                        description: 'add train type'
-                    })
-                },
-                {
-                    opcode: 'resetTrain',
-                    blockType: BlockType.COMMAND,
-                    text: formatMessage({
-                        id: 'knn.reset',
-                        default: 'Reset [STRING]',
-                        description: 'reset'
-                    }),
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label1"
-                        }
-                    }
-                },
-                {
-                    opcode: 'Sample1',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'knn.sample',
-                        default: 'Sample',
-                        description: 'samples'
-                    }) + '1',
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label1"
-                        }
-                    }
-                },
-                {
-                    opcode: 'Sample2',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'knn.sample',
-                        default: 'Sample',
-                        description: 'samples'
-                    }) + '2',
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label1"
-                        }
-                    }
-                },
-                {
-                    opcode: 'Sample3',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'knn.sample',
-                        default: 'Sample',
-                        description: 'samples'
-                    }) + '3',
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label1"
-                        }
-                    }
-                },
-                {
-                    opcode: 'Samples',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'knn.samples',
-                        default: 'Samples [STRING]',
-                        description: 'samples'
-                    }),
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label1"
-                        }
-                    }
-                },
-                {
-                    opcode: 'getResult',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'knn.getResult',
-                        default: 'Result',
-                        description: 'getResult'
-                    }),
-                    arguments: {
-
-                    }
-                },
-                {
-                    opcode: 'getConfidence',
-                    blockType: BlockType.REPORTER,
-                    text: formatMessage({
-                        id: 'knn.getConfidence',
-                        default: 'getConfidence [STRING]',
-                        description: 'getConfidence'
-                    }),
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label1"
-                        }
-                    }
-                },
-                {
-                    opcode: 'whenGetResult',
-                    blockType: BlockType.HAT,
-                    text: formatMessage({
-                        id: 'knn.whenGetResult',
-                        default: 'when get [STRING]',
-                        description: 'whenGetResult'
-                    }),
-                    arguments: {
-                        STRING: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "label1"
-                        }
-                    }
-                }
             ],
-            menus: {
-                ATTRIBUTE: {
-                    acceptReporters: true,
-                    items: this._buildMenu(this.ATTRIBUTE_INFO)
-                },
-                SUBJECT: {
-                    acceptReporters: true,
-                    items: this._buildMenu(this.SUBJECT_INFO)
-                },
-                VIDEO_STATE: {
-                    acceptReporters: true,
-                    items:this._buildMenu(this.VIDEO_STATE_INFO),
-                },
-                typemenu: {
-                    acceptReporters: true,
-                    items: '_typeArr'
-                }
-            }
+            menus: {},
         };
     }
 
-    _typeArr () {
-        return typeArr.slice(3).map(item => item.toString())
-    }
-    /**
-     * A scratch command block handle that configures the video state from
-     * passed arguments.
-     * @param {object} args - the block arguments
-     * @param {VideoState} args.VIDEO_STATE - the video state to set the device to
-     */
-    videoToggle(args) {
-        const state = args.VIDEO_STATE;
-        this.globalVideoState = state;
-        if (state === VideoState.OFF) {
-            this.runtime.ioDevices.video.disableVideo();
-        } else {
-            this.runtime.ioDevices.video.enableVideo();
-            // Mirror if state is ON. Do not mirror if state is ON_FLIPPED.
-            this.runtime.ioDevices.video.mirror = state === VideoState.ON;
-        }
-    }
-
-    /**
-     * A scratch command block handle that configures the video preview's
-     * transparency from passed arguments.
-     * @param {object} args - the block arguments
-     * @param {number} args.TRANSPARENCY - the transparency to set the video
-     *   preview to
-     */
-    setVideoTransparency(args) {
-        const transparency = Cast.toNumber(args.TRANSPARENCY);
-        this.globalVideoTransparency = transparency;
-        this.runtime.ioDevices.video.setPreviewGhost(transparency);
-    }
-
-    clearClass(classIndex) {
-        this.classifier.clearClass(classIndex);
-    }
-
-    updateExampleCounts(args, util) {
-        let counts = this.classifier.getClassExampleCount();
-        this.runtime.emit('SAY', util.target, 'say', this.trainTypes.map((item, index) => {
-            return item + '样本数：' + (counts[index] || 0) + '\n'
-        }).join('\n'));
-    }
-
-    isloaded() {
-        return Boolean(this.mobilenet)
-    }
-    train(args, util) {
-        if (this.globalVideoState === VideoState.OFF) {
-            console.log('请先打开摄像头')
-            return
-        }
-        let index = typeArr.findIndex(item => item === args.type)
-        let img = document.createElement('img')
-        img.src = this.runtime.ioDevices.video.getFrame({
-            format: Video.FORMAT_CANVAS,
-            dimensions: Scratch3Knn.DIMENSIONS
-        }).toDataURL("image/png")
-        img.width = 480
-        img.height = 360
-        img.onload = () => {
-            const img0 = tf.fromPixels(img);
-            const logits0 = this.mobilenet.infer(img0, 'conv_preds');
-            this.classifier.addExample(logits0, index);
-            this.trainTypes[index] = args.STRING
-        }
-    }
-
-    addTrainType() {
-        typeArr.push((typeArr.length + 1).toString())
-        this.trainTypes.push('label' + (this.trainTypes.length + 1).toString())
-    }
-
-    trainA(args, util) {
-        if (this.globalVideoState === VideoState.OFF) {
-            alert('请先打开摄像头')
-            return
-        }
-        let img = document.createElement('img')
-        img.src = this.runtime.ioDevices.video.getFrame({
-            format: Video.FORMAT_CANVAS,
-            dimensions: Scratch3Knn.DIMENSIONS
-        }).toDataURL("image/png")
-        img.width = 480
-        img.height = 360
-        img.onload = () => {
-            const img0 = tf.fromPixels(img);
-            const logits0 = this.mobilenet.infer(img0, 'conv_preds');
-            this.classifier.addExample(logits0, 0);
-            this.trainTypes[0] = args.STRING
-        }
-    }
-
-    trainB(args, util) {
-        if (this.globalVideoState === VideoState.OFF) {
-            alert('请先打开摄像头')
-            return
-        }
-        let img = document.createElement('img')
-        img.src = this.runtime.ioDevices.video.getFrame({
-            format: Video.FORMAT_CANVAS,
-            dimensions: Scratch3Knn.DIMENSIONS
-        }).toDataURL("image/png")
-        img.width = 480
-        img.height = 360
-        img.onload = () => {
-            const img0 = tf.fromPixels(img);
-            const logits0 = this.mobilenet.infer(img0, 'conv_preds');
-            this.classifier.addExample(logits0, 1);
-            this.trainTypes[1] = args.STRING
-        }
-    }
-
-    trainC(args, util) {
-        if (this.globalVideoState === VideoState.OFF) {
-            alert('请先打开摄像头')
-            return
-        }
-        let img = document.createElement('img')
-        img.src = this.runtime.ioDevices.video.getFrame({
-            format: Video.FORMAT_CANVAS,
-            dimensions: Scratch3Knn.DIMENSIONS
-        }).toDataURL("image/png")
-        img.width = 480
-        img.height = 360
-        img.onload = () => {
-            const img0 = tf.fromPixels(img);
-            const logits0 = this.mobilenet.infer(img0, 'conv_preds');
-            this.classifier.addExample(logits0, 2);
-            this.trainTypes[2] = args.STRING
-        }
-    }
-
-    trainD(args, util) {
-        if (this.globalVideoState === VideoState.OFF) {
-            alert('请先打开摄像头')
-            return
-        }
-        let img = document.createElement('img')
-        img.src = this.runtime.ioDevices.video.getFrame({
-            format: Video.FORMAT_CANVAS,
-            dimensions: Scratch3Knn.DIMENSIONS
-        }).toDataURL("image/png")
-        img.width = 480
-        img.height = 360
-        img.onload = () => {
-            const img0 = tf.fromPixels(img);
-            const logits0 = this.mobilenet.infer(img0, 'conv_preds');
-            this.classifier.addExample(logits0, 3);
-            this.trainTypes[3] = args.STRING
-            this.updateExampleCounts(args, util);
-        }
-    }
-
-    trainE(args, util) {
-        if (this.globalVideoState === VideoState.OFF) {
-            alert('请先打开摄像头')
-            return
-        }
-        let img = document.createElement('img')
-        img.src = this.runtime.ioDevices.video.getFrame({
-            format: Video.FORMAT_CANVAS,
-            dimensions: Scratch3Knn.DIMENSIONS
-        }).toDataURL("image/png")
-        img.width = 480
-        img.height = 360
-        img.onload = () => {
-            const img0 = tf.fromPixels(img);
-            const logits0 = this.mobilenet.infer(img0, 'conv_preds');
-            this.classifier.addExample(logits0, 4);
-            this.trainTypes[4] = args.STRING
-            this.updateExampleCounts(args, util);
-        }
-    }
-
-    trainF(args, util) {
-        if (this.globalVideoState === VideoState.OFF) {
-            alert('请先打开摄像头')
-            return
-        }
-        let img = document.createElement('img')
-        img.src = this.runtime.ioDevices.video.getFrame({
-            format: Video.FORMAT_CANVAS,
-            dimensions: Scratch3Knn.DIMENSIONS
-        }).toDataURL("image/png")
-        img.width = 480
-        img.height = 360
-        img.onload = () => {
-            const img0 = tf.fromPixels(img);
-            const logits0 = this.mobilenet.infer(img0, 'conv_preds');
-            this.classifier.addExample(logits0, 5);
-            this.trainTypes[5] = args.STRING
-            this.updateExampleCounts(args, util);
-        }
-    }
-    Samples(args, util) {
-        let counts = this.classifier.getClassExampleCount();
-        let index = this.trainTypes.indexOf(args.STRING)
-        return counts[index] || 0
-    }
-    Sample1(args, util) {
-        let counts = this.classifier.getClassExampleCount();
-        let index = 0
-        return counts[index] || 0
-    }
-    Sample2(args, util) {
-        let counts = this.classifier.getClassExampleCount();
-        let index = 1
-        return counts[index] || 0
-    }
-    Sample3(args, util) {
-        let counts = this.classifier.getClassExampleCount();
-        let index = 2
-        return counts[index] || 0
-    }
-    resetTrain(args, util) {
-        let counts = this.classifier.getClassExampleCount();
-        let index = this.trainTypes.indexOf(args.STRING)
-        if (!counts[index]) {
-            alert('该类别无训练数据')
-            return
-        }
-        if (index < 0) {
-            alert('未找到对应类别')
-            return
-        }
-        this.clearClass(index);
-        // this.updateExampleCounts(args, util);
-    }
-
-    getResult(args, util) {
-        return this.trainResult
-    }
-    getConfidence(args, util) {
-        let index = this.trainTypes.indexOf(args.STRING)
-        if (index === -1) {
-            return 0
-        }
-        return (this.trainConfidences && this.trainConfidences[index]) || 0
-    }
-    gotResult(args, util) {
-        return new Promise((resolve, reject) => {
-            let img = document.createElement('img')
-            let frame = this.runtime.ioDevices.video.getFrame({
-                format: Video.FORMAT_CANVAS,
-                dimensions: Scratch3Knn.DIMENSIONS
-            })
-            if (!Object.keys(this.classifier.getClassExampleCount()).length) {
-                resolve()
-                return
-            }
-            if (frame) {
-                img.src = frame.toDataURL("image/png")
-            } else {
-                resolve()
-                return
-            }
-            img.width = 480
-            img.height = 360
-            img.onload = async () => {
-                const x = tf.fromPixels(img);
-                const xlogits = this.mobilenet.infer(x, 'conv_preds');
-                console.log('Predictions:');
-                let res = await this.classifier.predictClass(xlogits);
-                console.log(this.classifier.getClassExampleCount(), res)
-                this.trainResult = this.trainTypes[res.classIndex] || 0
-                this.trainConfidences = res.confidences
-                resolve(this.trainResult)
-            }
-        })
-    }
-
-    whenGetResult(args, util) {
-        if (this.trainResult === undefined) {
-            return false
-        }
-        setTimeout(() => {
-            this.trainResult = undefined
-        }, 100)
-        return args.STRING === this.trainResult
-    }
-
-    async knnInit () {
-        this.classifier = knnClassifier.create();
-        this.mobilenet = await mobilenetModule.load();
+    trainModel(e) {
+        console.log(e);
     }
 }
 
-module.exports = Scratch3Knn;
+module.exports = MachineLearning;
