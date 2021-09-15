@@ -403,8 +403,6 @@ class TextRecognition {
                         state.result = res.data;
                         state.type = type;
                         resolve();
-                    } else {
-                        reject();
                     }
                 };
             });
