@@ -21,7 +21,8 @@ const REMOTE_URL = {
     WEATHER_DAY: "/api/weather/day",
     WEATHER_NOW: "/api/weather/now",
     WEATHER_AIR: "/api/weather/air",
-    WORLD_TIME: "/api/weather/time"
+    WORLD_TIME: "/api/weather/time",
+    INDICES: "/api/weather/indices"
 };
 
 const AIR_INDEX = ["AQI", "PM2.5", "PM10", "CO", "SO2", "NO2"];
@@ -39,8 +40,6 @@ class IntelligentRecognition {
         // string op
         this.decoder = new TextDecoder();
         this.lineBuffer = "";
-        this.cityList = [];
-        this._getCityList("青岛").then((list) => (this.cityList = list));
     }
 
     /**
@@ -67,39 +66,6 @@ class IntelligentRecognition {
 
     get AIR_INDEX() {
         return AIR_INDEX;
-    }
-
-    _getCityList(location) {
-        return new Promise((resolve, reject) => {
-            fetchWithTimeout(
-                this.runtime.REMOTE_HOST + this.REMOTE_URL.CITY_LIST,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Token": this.runtime.getToken(),
-                    },
-                    body: JSON.stringify({
-                        location,
-                    }),
-                },
-                serverTimeoutMs
-            )
-                .then((response) => response.json())
-                .then((data) => {
-                    const list =
-                        Array.isArray(data.data) &&
-                        data.data.map((elem) => ({
-                            text: elem.name,
-                            value: elem.id,
-                        }));
-                    resolve(data.data);
-                })
-                .catch((err) => {
-                    console.log("RequestError", state.remote_url, err);
-                    reject(err);
-                });
-        });
     }
 
     /**
@@ -144,7 +110,6 @@ class IntelligentRecognition {
             blockIconURI: blockIconURI,
             blocks: [
                 {
-                    id: "123",
                     opcode: "chooseCity",
                     blockType: BlockType.REPORTER,
                     checkboxInFlyout: false,
@@ -311,6 +276,21 @@ class IntelligentRecognition {
                         id: "diIntelligentRecognition.getWorldTime",
                         default: "[CITY]的当前时间",
                         description: "getWorldTime",
+                    }),
+                    arguments: {
+                        CITY: {
+                            type: ArgumentType.STRING,
+                            defaultValue: " ",
+                        },
+                    },
+                },
+                {
+                    opcode: "getUVI",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "diIntelligentRecognition.getUVI",
+                        default: "[CITY]的紫外线指数",
+                        description: "getUVI",
                     }),
                     arguments: {
                         CITY: {
@@ -623,6 +603,40 @@ class IntelligentRecognition {
                 .then((response) => response.json())
                 .then((data) => {
                     resolve(data.data);
+                })
+                .catch((err) => {
+                    console.log("RequestError", err);
+                    reject(err);
+                });
+        })
+    }
+
+    getUVI(args) {
+        if (!this.runtime.isLogin()) return;
+        const location = args.CITY;
+        return new Promise((resolve, reject) => {
+            if (typeof location !== 'object') {
+                this.runtime.emit("MESSAGE_INFO", "请选择城市！");
+                reject("请选择城市！");
+            }
+            fetchWithTimeout(
+                this.runtime.REMOTE_HOST + this.REMOTE_URL.INDICES,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        type: 5,
+                        location: location.value
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Token": this.runtime.getToken(),
+                    },
+                },
+                serverTimeoutMs
+            )
+                .then((response) => response.json())
+                .then((data) => {
+                    resolve(data.data.category);
                 })
                 .catch((err) => {
                     console.log("RequestError", err);
