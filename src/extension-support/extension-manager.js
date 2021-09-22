@@ -231,6 +231,7 @@ class ExtensionManager {
      */
     getDeviceList () {
         return new Promise(resolve => {
+            return resolve();
             fetch(localDevicesUrl)
                 .then(response => response.json())
                 .then(devices => {
