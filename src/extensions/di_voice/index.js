@@ -372,7 +372,7 @@ class diVoice {
                 {
                     opcode: "speak",
                     text: formatMessage({
-                        id: "text2speech.speakBlock",
+                        id: "textRecognition.speakBlock",
                         default: "朗读 [WORDS]",
                         description: "Speak some words.",
                     }),
@@ -387,7 +387,7 @@ class diVoice {
                 {
                     opcode: "speakAndWait",
                     text: formatMessage({
-                        id: "text2speech.speakWaitBlock",
+                        id: "textRecognition.speakWaitBlock",
                         default: "朗读 [WORDS]直到结束",
                         description: "Speak some words.",
                     }),
@@ -402,7 +402,7 @@ class diVoice {
                 {
                     opcode: "voiceRecognition",
                     text: formatMessage({
-                        id: "text2speech.voiceRecognitionBlock",
+                        id: "textRecognition.voiceRecognitionBlock",
                         default:
                             "开始[RECO_LANG]语音识别，持续[VOICE_RECO_TIME]秒",
                         description: "Voice recognition",
