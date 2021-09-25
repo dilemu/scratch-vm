@@ -330,6 +330,15 @@ class DiImageProcessing {
                         },
                     },
                 },
+                {
+                    opcode: "matting",
+                    blockType: BlockType.COMMAND,
+                    text: formatMessage({
+                        id: "diImageProcessing.matting",
+                        default: "开始舞台图像抠图",
+                        description: "matting",
+                    })
+                },
             ],
             menus: {
                 STYLE_LIST: {
@@ -498,6 +507,10 @@ class DiImageProcessing {
                 };
             });
         });
+    }
+
+    matting() {
+        
     }
 }
 

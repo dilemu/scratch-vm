@@ -109,19 +109,123 @@ class MachineLearning {
             color2: "#FF7C00",
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
-            blocks: [
-                {
-                    func: "trainModel",
-                    blockType: BlockType.BUTTON,
-                    text: formatMessage({
-                        id: "machineLearning.trainModel",
-                        default: "训练模型",
-                        description: "trainModel",
-                    }),
-                },
-            ],
-            menus: {},
+            blocks: this.getBlocks(),
+            menus: {
+                CLASS_LIST: [
+                    {
+                        text: "分类1",
+                        value: "分类1"
+                    },
+                    {
+                        text: "分类2",
+                        value: "分类2"
+                    },
+                    {
+                        text: "分类3",
+                        value: "分类3"
+                    },
+                ]
+            },
         };
+    }
+
+    getBlocks() {
+        return [
+            {
+                func: "trainModel",
+                blockType: BlockType.BUTTON,
+                text: formatMessage({
+                    id: "machineLearning.trainModel",
+                    default: "训练模型",
+                    description: "trainModel",
+                }),
+            },
+            {
+                func: "startImgPredict",
+                blockType: BlockType.BUTTON,
+                text: formatMessage({
+                    id: "machineLearning.startImgPredict",
+                    default: "打开识别窗口",
+                    description: "startImgPredict",
+                }),
+            },
+            {
+                opcode: "predictResult",
+                blockType: BlockType.REPORTER,
+                text: formatMessage({
+                    id: "machineLearning.predictResult",
+                    default: '识别结果',
+                    description: "predictResult",
+                }),
+            },
+            {
+                opcode: "confidence",
+                blockType: BlockType.REPORTER,
+                text: formatMessage({
+                    id: "machineLearning.confidence",
+                    default: '[CLASS]信心',
+                    description: "confidence",
+                }),
+                arguments: {
+                    CLASS: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: "分类1",
+                        menu: "CLASS_LIST",
+                    },
+                },
+                label: "已选分类信心",
+            },
+            {
+                opcode: "predictResultBoolean",
+                blockType: BlockType.BOOLEAN,
+                text: formatMessage({
+                    id: "machineLearning.predictResultBoolean",
+                    default: '识别结果为[CLASS]',
+                    description: "predictResultBoolean",
+                }),
+                arguments: {
+                    CLASS: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: "分类1",
+                        menu: "CLASS_LIST",
+                    },
+                }
+            },
+        ]
+    }
+
+    predictResult() {
+        return new Promise((resolve, reject) => {
+            this.runtime.once("img_predict_result", result => {
+                console.log(result);
+                result.sort((a, b) => b.confidence - a.confidence)
+                resolve(result[0].className);
+            })
+            this.runtime.emit("start_img_predict_result");
+        })
+    }
+
+    confidence(args) {
+        const CLASS = args.CLASS;
+        return new Promise((resolve, reject) => {
+            this.runtime.once("img_predict_result", result => {
+                const find = result.find(e => e.className === CLASS)
+                resolve((find.confidence * 100).toFixed(2) + '%');
+            })
+            this.runtime.emit("start_img_predict_result");
+        })
+    }
+
+    predictResultBoolean(args) {
+        const CLASS = args.CLASS;
+        return new Promise((resolve, reject) => {
+            this.runtime.once("img_predict_result", result => {
+                console.log(result);
+                result.sort((a, b) => b.confidence - a.confidence)
+                resolve(result[0].className === CLASS);
+            })
+            this.runtime.emit("start_img_predict_result");
+        })
     }
 
 }

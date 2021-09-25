@@ -473,7 +473,7 @@ class diBodyRecognition {
                     if (xhr.readyState == 4) {
                         const res = JSON.parse(xhr.response);
                         state.gestureResult =
-                            (res.data && res.data.name) || "未能识别";
+                            (res.data && res.data.name && res.data.name.replace(/（.*?）/g, '' )) || "未能识别";
                     }
                     resolve();
                 };
