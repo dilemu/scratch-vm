@@ -32,6 +32,9 @@ class MachineLearning {
         // string op
         this.decoder = new TextDecoder();
         this.lineBuffer = "";
+        this.runtime.on("use_model", (classList) => {
+            dispatch.call("runtime", "_refreshExtensionPrimitives", this.getInfo(classList));
+        })
     }
 
     /**
@@ -102,38 +105,30 @@ class MachineLearning {
         }
     }
 
-    getInfo(test='哈哈') {
-        return {
+    getInfo(classList) {
+        const info = {
             id: "diMachineLearning",
             name: "机器学习",
             color1: "#FF7C00",
             color2: "#FF7C00",
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
-            blocks: this.getBlocks(test),
+            blocks: this.getBlocks(classList),
             menus: {
-                CLASS_LIST: {
-                    items: [
-                        {
-                            text: "分类1",
-                            value: "分类1",
-                        },
-                        {
-                            text: "分类2",
-                            value: "分类2",
-                        },
-                        {
-                            text: "分类3",
-                            value: "分类3",
-                        },
-                    ],
-                },
             },
-        };
+        }
+        if(Array.isArray(classList) && classList.length) {
+            info.menus["CLASS_LIST"] =  {
+                items: classList.map(e => {
+                    return {text:e, value:e}
+                }),
+            }
+        }
+        return info;
     }
 
-    getBlocks(test) {
-        return [
+    getBlocks(classList) {
+        const blockList = [
             {
                 func: "trainModel",
                 blockType: BlockType.BUTTON,
@@ -143,67 +138,63 @@ class MachineLearning {
                     description: "trainModel",
                 }),
             },
-            {
-                func: "startImgPredict",
-                blockType: BlockType.BUTTON,
-                text: formatMessage({
-                    id: "machineLearning.startImgPredict",
-                    default: "打开识别窗口",
-                    description: "startImgPredict",
-                }),
-            },
-            {
-                opcode: "test",
-                blockType: BlockType.COMMAND,
-                text: formatMessage({
-                    id: "machineLearning.test",
-                    default: test,
-                    description: "test",
-                }),
-            },
-            {
-                opcode: "predictResult",
-                blockType: BlockType.REPORTER,
-                text: formatMessage({
-                    id: "machineLearning.predictResult",
-                    default: "识别结果",
-                    description: "predictResult",
-                }),
-            },
-            {
-                opcode: "confidence",
-                blockType: BlockType.REPORTER,
-                text: formatMessage({
-                    id: "machineLearning.confidence",
-                    default: "[CLASS]信心",
-                    description: "confidence",
-                }),
-                arguments: {
-                    CLASS: {
-                        type: ArgumentType.NUMBER,
-                        defaultValue: "分类1",
-                        menu: "CLASS_LIST",
+        ]
+        if(Array.isArray(classList) && classList.length) {
+            blockList.push.apply(blockList, [
+                {
+                    func: "startImgPredict",
+                    blockType: BlockType.BUTTON,
+                    text: formatMessage({
+                        id: "machineLearning.startImgPredict",
+                        default: "打开识别窗口",
+                        description: "startImgPredict",
+                    }),
+                },    
+                {
+                    opcode: "predictResult",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "machineLearning.predictResult",
+                        default: "识别结果",
+                        description: "predictResult",
+                    }),
+                },
+                {
+                    opcode: "confidence",
+                    blockType: BlockType.REPORTER,
+                    text: formatMessage({
+                        id: "machineLearning.confidence",
+                        default: "[CLASS]信心",
+                        description: "confidence",
+                    }),
+                    arguments: {
+                        CLASS: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: classList[0],
+                            menu: "CLASS_LIST",
+                        },
+                    },
+                    label: "已选分类信心",
+                },
+                {
+                    opcode: "predictResultBoolean",
+                    blockType: BlockType.BOOLEAN,
+                    text: formatMessage({
+                        id: "machineLearning.predictResultBoolean",
+                        default: "识别结果为[CLASS]",
+                        description: "predictResultBoolean",
+                    }),
+                    arguments: {
+                        CLASS: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: classList[0],
+                            menu: "CLASS_LIST",
+                        },
                     },
                 },
-                label: "已选分类信心",
-            },
-            {
-                opcode: "predictResultBoolean",
-                blockType: BlockType.BOOLEAN,
-                text: formatMessage({
-                    id: "machineLearning.predictResultBoolean",
-                    default: "识别结果为[CLASS]",
-                    description: "predictResultBoolean",
-                }),
-                arguments: {
-                    CLASS: {
-                        type: ArgumentType.NUMBER,
-                        defaultValue: "分类1",
-                        menu: "CLASS_LIST",
-                    },
-                },
-            },
-        ];
+            ])
+        }
+        return blockList;
     }
 
     predictResult() {
@@ -239,10 +230,6 @@ class MachineLearning {
             this.runtime.emit("start_img_predict_result");
         });
     }
-
-    test() {
-        dispatch.call("runtime", "_refreshExtensionPrimitives", this.getInfo('嘿嘿嘿'));
-    };
 }
 
 module.exports = MachineLearning;
