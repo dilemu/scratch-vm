@@ -191,6 +191,7 @@ class MachineLearning {
                             menu: "CLASS_LIST",
                         },
                     },
+                    isDynamic1: true
                 },
             ])
         }
