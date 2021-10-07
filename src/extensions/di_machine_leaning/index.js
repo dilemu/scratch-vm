@@ -33,8 +33,11 @@ class MachineLearning {
         this.decoder = new TextDecoder();
         this.lineBuffer = "";
         this.runtime.on("use_model", (classList) => {
-            dispatch.call("runtime", "_refreshExtensionPrimitives", this.getInfo(classList));
+            this.manualClassList = classList;
+            // dispatch.callSync("runtime", "_refreshExtensionPrimitives", this.getInfo(classList));
+            this.runtime.emit("TOOLBOX_EXTENSIONS_NEED_UPDATE");
         })
+        this.manualClassList = []
     }
 
     /**
@@ -105,7 +108,8 @@ class MachineLearning {
         }
     }
 
-    getInfo(classList) {
+    getInfo() {
+        const classList = this.manualClassList;
         const info = {
             id: "diMachineLearning",
             name: "机器学习",
@@ -161,7 +165,7 @@ class MachineLearning {
                 },
                 {
                     opcode: "confidence",
-                    blockType: BlockType.REPORTER,
+                    blockType: BlockType.COMMAND,
                     text: formatMessage({
                         id: "machineLearning.confidence",
                         default: "[CLASS]信心",
@@ -191,7 +195,6 @@ class MachineLearning {
                             menu: "CLASS_LIST",
                         },
                     },
-                    isDynamic1: true
                 },
             ])
         }
