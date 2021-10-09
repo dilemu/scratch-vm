@@ -276,8 +276,8 @@ class diBodyRecognition {
         return {
             id: "diBodyRecognition",
             name: "人体识别",
-            color1: "#FFA279",
-            color2: "#FFA279",
+            color1: "#E05471",
+            color2: "#E05471",
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [
@@ -423,7 +423,7 @@ class diBodyRecognition {
                             type: ArgumentType.STRING,
                             menu: "COORDINATE_LIST",
                             defaultValue: "x",
-                        }
+                        },
                     },
                 },
             ],
@@ -443,7 +443,7 @@ class diBodyRecognition {
                 COORDINATE_LIST: {
                     acceptReporters: true,
                     items: this._buildMenu(this.COORDINATE_INFO),
-                }
+                },
             },
         };
     }

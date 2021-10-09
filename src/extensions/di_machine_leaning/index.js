@@ -113,14 +113,13 @@ class MachineLearning {
         const info = {
             id: "diMachineLearning",
             name: "机器学习",
-            color1: "#FF7C00",
-            color2: "#FF7C00",
+            color1: "#FFC100",
+            color2: "#FFC100",
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: this.getBlocks(classList),
-            menus: {
-            },
-        }
+            menus: {},
+        };
         if(Array.isArray(classList) && classList.length) {
             info.menus["CLASS_LIST"] =  {
                 items: classList.map(e => {
