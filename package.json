@@ -1,13 +1,14 @@
 {
   "name": "delightmom-scratch-vm",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "Virtual Machine for Delightmom",
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",
   "homepage": "https://github.com/dilemu/scratch-vm#readme",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/dilemu/scratch-vm.git"
+    "url": "git+ssh://git@github.com/dilemu/scratch-vm.git",
+    "sha": "ef77a74283133d3ca047bbb5b0553566a84de3e1"
   },
   "main": "./dist/node/delightmom-scratch-vm.js",
   "browser": "./src/index.js",
@@ -66,6 +67,8 @@
     "babel-loader": "^8.0.4",
     "callsite": "^1.0.0",
     "copy-webpack-plugin": "^4.5.4",
+    "delightmom-scratch-blocks": "latest",
+    "delightmom-scratch-l10n": "latest",
     "docdash": "^1.0.0",
     "eslint": "^5.3.0",
     "eslint-config-scratch": "^5.0.0",
@@ -76,8 +79,6 @@
     "jsdoc": "^3.6.2",
     "json": "^9.0.4",
     "lodash.defaultsdeep": "4.6.1",
-    "delightmom-scratch-blocks": "latest",
-    "delightmom-scratch-l10n": "latest",
     "pngjs": "^3.3.2",
     "scratch-audio": "latest",
     "scratch-render": "latest",
