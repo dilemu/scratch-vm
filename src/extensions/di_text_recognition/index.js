@@ -433,6 +433,7 @@ class TextRecognition {
     }
 
     sayToRobot(args, util) {
+        if (!this.runtime.isLogin()) return;
         const TXT = args.TXT;
         const state = this._getState(util.target);
         state.robotQuestion = TXT;

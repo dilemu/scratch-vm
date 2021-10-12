@@ -597,7 +597,8 @@ class diBodyRecognition {
         const state = this._getState(util.target);
         const type = args.TYPE;
         return (
-            (state.characterResult[type] && state.characterResult[type].name) ||
+            (state.characterResult[type] &&
+                state.characterResult[type].name.replace("无口罩", "不确定")) ||
             "未能识别"
         );
     }
