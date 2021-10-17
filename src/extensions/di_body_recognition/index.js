@@ -276,8 +276,8 @@ class diBodyRecognition {
         return {
             id: "diBodyRecognition",
             name: "人体识别",
-            color1: "#E05471",
-            color2: "#E05471",
+            color1: "#F99062",
+            color2: "#F99062",
             menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             blocks: [

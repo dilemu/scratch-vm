@@ -1,6 +1,6 @@
 {
   "name": "delightmom-scratch-vm",
-  "version": "0.1.22",
+  "version": "0.1.24",
   "description": "Virtual Machine for Delightmom",
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/dilemu/scratch-vm.git",
-    "sha": "ef77a74283133d3ca047bbb5b0553566a84de3e1"
+    "sha": "7edd36fea81b6340f00d563fc4eea98f3713ed2c"
   },
   "main": "./dist/node/delightmom-scratch-vm.js",
   "browser": "./src/index.js",
@@ -20,7 +20,6 @@
     "i18n:src": "mkdirp translations/core && format-message extract --out-file translations/core/en.json src/extensions/**/**.js src/devices/**/**.js",
     "i18n:push": "tx-push-src openblock-editor extensions translations/core/en.json",
     "lint": "eslint . && format-message lint src/**/*.js",
-    "prepublish": "in-publish && npm run build || not-in-publish",
     "start": "webpack-dev-server",
     "tap": "",
     "tap:unit": "",

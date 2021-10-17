@@ -460,6 +460,7 @@ class diVoice {
         // Cast input to string
         if (!this.runtime.isLogin()) return;
         let words = Cast.toString(args.WORDS);
+        if(!isNaN(words)) words = words.split('').join(',');
         const state = this._getState(util.target);
         const { speaker, spd, pit, vol } = state;
         // Perform HTTP request to get audio file
@@ -512,6 +513,7 @@ class diVoice {
         // Cast input to string
         if (!this.runtime.isLogin()) return;
         let words = Cast.toString(args.WORDS);
+        if(!isNaN(words)) words = words.split('').join(',');
         const state = this._getState(util.target);
         const { speaker, spd, pit, vol } = state;
         // Perform HTTP request to get audio file
