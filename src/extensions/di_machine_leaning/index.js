@@ -34,8 +34,8 @@ class MachineLearning {
         this.lineBuffer = "";
         this.runtime.on("use_model", (classList) => {
             this.manualClassList = classList;
-            // dispatch.callSync("runtime", "_refreshExtensionPrimitives", this.getInfo(classList));
             this.runtime.emit("TOOLBOX_EXTENSIONS_NEED_UPDATE");
+            setTimeout(() => {this.runtime.emit("FORCE_REFRESH_WORKSPACE");}, 200)
         })
         this.manualClassList = []
     }

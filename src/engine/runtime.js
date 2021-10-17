@@ -868,6 +868,10 @@ class Runtime extends EventEmitter {
         return 'BLOCKSINFO_UPDATE';
     }
 
+    static get FORCE_REFRESH_WORKSPACE () {
+        return "FORCE_REFRESH_WORKSPACE";
+    }
+
     /**
      * Event name when the runtime tick loop has been started.
      * @const {string}
