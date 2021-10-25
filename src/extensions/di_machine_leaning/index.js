@@ -37,7 +37,8 @@ class MachineLearning {
             this.runtime.emit("TOOLBOX_EXTENSIONS_NEED_UPDATE");
             setTimeout(() => {this.runtime.emit("FORCE_REFRESH_WORKSPACE");}, 200)
         })
-        this.manualClassList = []
+        if (window.imgTrainNeedInitial && window.imgClassNameList) this.manualClassList = window.imgClassNameList;
+        else this.manualClassList = [];
     }
 
     /**

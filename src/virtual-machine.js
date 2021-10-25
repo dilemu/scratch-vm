@@ -578,11 +578,19 @@ class VirtualMachine extends EventEmitter {
             }
             return Promise.reject('Unable to verify Scratch Project version.');
         };
-        return deserializePromise()
-            .then(({targets}) =>
-                this.installTargets(targets, projectJSON.extensions, true,
-                    projectJSON.device, projectJSON.deviceType, projectJSON.pnpIdList,
-                    projectJSON.programMode, projectJSON.deviceExtensions));
+        return deserializePromise().then(({ targets }) =>
+            this.installTargets(
+                targets,
+                projectJSON.extensions,
+                true,
+                projectJSON.device,
+                projectJSON.deviceType,
+                projectJSON.pnpIdList,
+                projectJSON.programMode,
+                projectJSON.deviceExtensions,
+                projectJSON
+            )
+        );
     }
 
     /**
@@ -634,7 +642,7 @@ class VirtualMachine extends EventEmitter {
      * @returns {Promise} resolved once targets have been installed
      */
     installTargets (targets, extensions, wholeProject, device = null,
-        deviceType = null, pnpIdList = null, programMode = 'realtime', deviceExtensions = null) {
+        deviceType = null, pnpIdList = null, programMode = 'realtime', deviceExtensions = null, projectJSON) {
         const allPromises = [];
 
         if (device) {
@@ -662,6 +670,22 @@ class VirtualMachine extends EventEmitter {
                     }
                 });
             } else {
+                if (extensions.indexOf("diMachineLeaning") > -1) {
+                    if (projectJSON.tm_img_train) {
+                        const {
+                            imgClassNameList,
+                            needInitial,
+                            imgClassifierDataset,
+                        } = projectJSON.tm_img_train;
+                        window.imgClassNameList = imgClassNameList;
+                        window.imgTrainNeedInitial = needInitial;
+                        window.imgClassifierDataset = imgClassifierDataset;
+                        this.runtime.emit(
+                            "restore_img_classifier",
+                            imgClassifierDataset
+                        );
+                    }
+                }
                 extensions.forEach(extensionID => {
                     if (!this.extensionManager.isExtensionLoaded(extensionID)) {
                         // const extensionURL = extensions.extensionURLs.get(extensionID) || extensionID;

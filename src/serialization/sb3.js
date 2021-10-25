@@ -16,6 +16,7 @@ const uid = require('../util/uid');
 const MathUtil = require('../util/math-util');
 const StringUtil = require('../util/string-util');
 const VariableUtil = require('../util/variable-util');
+const _ = require("lodash")
 
 const {loadCostume} = require('../import/load-costume.js');
 const {loadSound} = require('../import/load-sound.js');
@@ -565,6 +566,32 @@ const serialize = function (runtime, targetId) {
     // Assemble extension list
     obj.extensions = runtime.getCurrentExtensionLoaded();
 
+    if (obj.extensions.indexOf("diMachineLeaning") > -1) {
+        if (window.imageClassifier && window.imgClassNameList) {
+            const stringify = (dataset) => {
+                const _dataset = []
+                Object.entries(dataset).forEach(([
+                    label,
+                    value,
+                ]) => {
+                    _dataset.push({
+                        label,
+                        values: Array.from(value.dataSync()),
+                        shape: value.shape,
+                    });
+                });
+                return JSON.stringify(_dataset);
+            };
+            const imgClassifierDataset = stringify(
+                window.imageClassifier.getClassifierDataset()
+            );
+            obj.tm_img_train = {
+                imgClassNameList: window.imgClassNameList,
+                needInitial: true,
+                imgClassifierDataset
+            };
+        }
+    }
     // Assemble device extension list
     obj.deviceExtensions = runtime.getCurrentDeviceExtensionLoaded();
 
