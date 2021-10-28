@@ -1,6 +1,6 @@
 {
   "name": "delightmom-scratch-vm",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "description": "Virtual Machine for Delightmom",
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/dilemu/scratch-vm.git",
-    "sha": "5a18469da4a8f46192c685597afdd2436ab0b5a5"
+    "sha": "36ee49422aedb6b69249a55ed6f91458c71c8f70"
   },
   "main": "./dist/node/delightmom-scratch-vm.js",
   "browser": "./src/index.js",

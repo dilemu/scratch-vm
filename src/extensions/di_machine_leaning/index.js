@@ -155,6 +155,7 @@ class MachineLearning {
                     }),
                 },    
                 {
+                    id: "predictResult",
                     opcode: "predictResult",
                     blockType: BlockType.REPORTER,
                     text: formatMessage({
@@ -205,6 +206,10 @@ class MachineLearning {
         return new Promise((resolve, reject) => {
             this.runtime.once("img_predict_result", (result) => {
                 console.log(result);
+                if(!result) {
+                    resolve('请打开识别窗口');
+                    return
+                }
                 result.sort((a, b) => b.confidence - a.confidence);
                 resolve(result[0].className);
             });
@@ -216,6 +221,10 @@ class MachineLearning {
         const CLASS = args.CLASS;
         return new Promise((resolve, reject) => {
             this.runtime.once("img_predict_result", (result) => {
+                if (!result) {
+                    resolve("请打开识别窗口");
+                    return;
+                }
                 const find = result.find((e) => e.className === CLASS);
                 resolve((find.confidence * 100).toFixed(2) + "%");
             });
@@ -227,6 +236,10 @@ class MachineLearning {
         const CLASS = args.CLASS;
         return new Promise((resolve, reject) => {
             this.runtime.once("img_predict_result", (result) => {
+                if (!result) {
+                    resolve("请打开识别窗口");
+                    return;
+                }
                 console.log(result);
                 result.sort((a, b) => b.confidence - a.confidence);
                 resolve(result[0].className === CLASS);
