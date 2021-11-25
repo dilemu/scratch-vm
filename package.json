@@ -1,6 +1,6 @@
 {
   "name": "delightmom-scratch-vm",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "description": "Virtual Machine for Delightmom",
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",
@@ -8,13 +8,12 @@
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/dilemu/scratch-vm.git",
-    "sha": "36ee49422aedb6b69249a55ed6f91458c71c8f70"
+    "sha": "0d42123c7c84f757bb9d1f049a40cc51616c6d4a"
   },
   "main": "./dist/node/delightmom-scratch-vm.js",
   "browser": "./src/index.js",
   "scripts": {
     "build": "webpack --progress --colors --bail",
-    "prepublish": "in-publish && npm run build || not-in-publish",
     "coverage": "tap ./test/{unit,integration}/*.js --coverage --coverage-report=lcov",
     "deploy": "touch playground/.nojekyll",
     "docs": "jsdoc -c .jsdoc.json",

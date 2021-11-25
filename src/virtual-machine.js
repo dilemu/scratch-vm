@@ -1406,11 +1406,14 @@ class VirtualMachine extends EventEmitter {
         }
 
         // Create a unique set of extensionIds that are not yet loaded
-        const extensionIDs = new Set(copiedBlocks
+        let extensionIDs = new Set(copiedBlocks
             .map(b => sb3.getExtensionIdForOpcode(b.opcode))
             .filter(id => !!id) // Remove ids that do not exist
             .filter(id => !this.extensionManager.isExtensionLoaded(id)) // and remove loaded extensions
         );
+
+        // Fix "null" in extensionIDs, it will causes block can not be copied.
+        extensionIDs =  Array.from(extensionIDs).filter(id => id !== "null");
 
         // Create an array promises for extensions to load
         const extensionPromises = Array.from(extensionIDs,

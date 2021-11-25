@@ -1348,6 +1348,7 @@ class Runtime extends EventEmitter {
     _convertBlockForScratchBlocks (blockInfo, categoryInfo) {
         const deviceType = this.getCurrentDeviceType();
         const extendedOpcode = `${deviceType}_${categoryInfo.id}_${blockInfo.opcode}`;
+        // const extendedOpcode = `${deviceType?deviceType + "_": ""}${categoryInfo.id}_${blockInfo.opcode}`;
 
         const blockJSON = {
             type: extendedOpcode,
