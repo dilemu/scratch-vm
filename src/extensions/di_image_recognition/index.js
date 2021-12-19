@@ -301,7 +301,7 @@ class DiImageRecognition {
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         state.result =
                             (res.data && res.data.name) || "未能识别";
                     }
@@ -352,7 +352,7 @@ class DiImageRecognition {
                             xhr.send(form);
                             xhr.onreadystatechange = function () {
                                 if (xhr.readyState == 4) {
-                                    const res = JSON.parse(xhr.response);
+                                    const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                                     state.result =
                                         (res.data && res.data.name) ||
                                         "未能识别";
@@ -392,7 +392,7 @@ class DiImageRecognition {
                     xhr.send(form);
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4) {
-                            const res = JSON.parse(xhr.response);
+                            const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                             state.result =
                                 (res.data && res.data.name) || "未能识别";
                         }

@@ -630,7 +630,7 @@ class diVoice {
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         state.voiceResult = res.data || [];
                     }
                     resolve();

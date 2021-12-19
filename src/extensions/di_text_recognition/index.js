@@ -362,7 +362,7 @@ class TextRecognition {
                     xhr.send(form);
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState == 4) {
-                            const res = JSON.parse(xhr.response);
+                            const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                             state.result = res.data;
                             state.type = type;
                         }
@@ -399,7 +399,7 @@ class TextRecognition {
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         state.result = res.data;
                         state.type = type;
                         resolve();
@@ -447,7 +447,7 @@ class TextRecognition {
                     this.runtime.REMOTE_HOST + this.REMOTE_URL.UNIT,
                     {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: { "Content-Type": "application/json", "Access-Token": this.runtime.getToken() },
                         body: JSON.stringify({
                             terminal_id: this.runtime.uuid,
                             query: state.robotQuestion,

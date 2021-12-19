@@ -471,7 +471,7 @@ class diBodyRecognition {
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         state.gestureResult =
                             (res.data && res.data.name && res.data.name.replace(/（.*?）/g, '' )) || "未能识别";
                     }
@@ -509,7 +509,7 @@ class diBodyRecognition {
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         state.emotionResult =
                             (res.data && res.data.type) || "未能识别";
                     }
@@ -547,7 +547,7 @@ class diBodyRecognition {
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         state.bodyNumResult = res.data + "人" || "未能识别";
                     }
                     resolve();
@@ -584,7 +584,7 @@ class diBodyRecognition {
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         state.characterResult = res.data;
                     }
                     resolve("识别完毕");
@@ -626,7 +626,7 @@ class diBodyRecognition {
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         state.bodyAxesResult = res.data;
                     }
                     resolve("识别完毕");

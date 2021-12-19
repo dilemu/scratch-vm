@@ -391,7 +391,7 @@ class DiImageProcessing {
                 state.uploadFile = null;
                 if (xhr.readyState == 4) {
                     try {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         const resBase64 = `data:${imgType};base64,${res.data.image}`;
                         const newBlob = dataURLtoBlob(resBase64);
                         const newImg = new File([newBlob], currentStage.name, {
@@ -447,7 +447,7 @@ class DiImageProcessing {
                 state.uploadFile = null;
                 if (xhr.readyState == 4) {
                     try {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         const resBase64 = `data:${imgType};base64,${res.data.image}`;
                         const newBlob = dataURLtoBlob(resBase64);
                         const newImg = new File([newBlob], currentStage.name, {
@@ -494,7 +494,7 @@ class DiImageProcessing {
                 xhr.send(form);
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState == 4) {
-                        const res = JSON.parse(xhr.response);
+                        const res = JSON.parse(xhr.response);if(res.code!==0) alert(res.message);
                         const type = "image/png";
                         const resBase64 = `data:${type};base64,${res.data.image}`;
                         // const newBlob = dataURLtoBlob(resBase64);
