@@ -71,6 +71,17 @@ const ArgumentTypeMap = (() => {
             fieldName: 'COLOUR'
         }
     };
+    map[ArgumentType.HALF_ANGLE] = {
+        shadow: {
+            type: 'math_half_angle',
+            fieldName: 'NUM'
+        }
+    };
+    map[ArgumentType.IMAGE] = {
+        // Inline images are weird because they're not actually "arguments".
+        // They are more analagous to the label on a block.
+        fieldType: 'field_image'
+    };
     map[ArgumentType.NUMBER] = {
         shadow: {
             type: 'math_number',
@@ -98,6 +109,12 @@ const ArgumentTypeMap = (() => {
             fieldName: 'NOTE'
         }
     };
+    map[ArgumentType.OTO100_NUMBER] = {
+        shadow: {
+            type: 'math_0to100_number',
+            fieldName: 'NUM'
+        }
+    };
     map[ArgumentType.UINT8_NUMBER] = {
         shadow: {
             type: 'math_uint8_number',
@@ -109,11 +126,6 @@ const ArgumentTypeMap = (() => {
             type: 'math_uint10_number',
             fieldName: 'NUM'
         }
-    };
-    map[ArgumentType.IMAGE] = {
-        // Inline images are weird because they're not actually "arguments".
-        // They are more analagous to the label on a block.
-        fieldType: 'field_image'
     };
     return map;
 })();
@@ -998,22 +1010,30 @@ class Runtime extends EventEmitter {
      */
     clearMonitor () {
         // uncheck all checkbox.
-        this.monitorBlocks.getAllIds().forEach(block => {
-            this.monitorBlocks.changeBlock({
-                id: block,
-                element: 'checkbox',
-                value: false
-            }, this.runtime);
-        });
+        this.monitorBlocks.getAllIds()
+            .filter(blockId => this.monitorBlocks.getBlock(blockId).isMonitored)
+            .forEach(id => {
+                this.monitorBlocks.changeBlock({
+                    id: id,
+                    element: 'checkbox',
+                    value: false
+                }, this.runtime);
+            });
 
         // delet current monitors
         this.targets.forEach(target => {
             if (target.isOriginal) target.deleteMonitors();
         });
         this._monitorState = OrderedMap({});
+        this.monitorBlockInfo = {};
+
+        this._pushMonitors();
 
         // Update gui
-        this.emit(Runtime.MONITORS_UPDATE, this._monitorState);
+        if (!this._prevMonitorState.equals(this._monitorState)) {
+            this.emit(Runtime.MONITORS_UPDATE, this._monitorState);
+            this._prevMonitorState = this._monitorState;
+        }
     }
 
     /**
@@ -1025,7 +1045,10 @@ class Runtime extends EventEmitter {
      */
     _makeExtensionMenuId (menuName, extensionId) {
         const deviceType = this.getCurrentDeviceType();
-        return `${deviceType}_${extensionId}_menu_${xmlEscape(menuName)}`;
+        if (deviceType) {
+            return `${deviceType}_${extensionId}_menu_${xmlEscape(menuName)}`;
+        }
+        return `${extensionId}_menu_${xmlEscape(menuName)}`;
     }
 
     /**
@@ -1347,8 +1370,13 @@ class Runtime extends EventEmitter {
      */
     _convertBlockForScratchBlocks (blockInfo, categoryInfo) {
         const deviceType = this.getCurrentDeviceType();
-        const extendedOpcode = `${deviceType}_${categoryInfo.id}_${blockInfo.opcode}`;
-        // const extendedOpcode = `${deviceType?deviceType + "_": ""}${categoryInfo.id}_${blockInfo.opcode}`;
+        let extendedOpcode;
+        if (deviceType) {
+            extendedOpcode = `${deviceType}_${categoryInfo.id}_${blockInfo.opcode}`;
+        } else {
+            extendedOpcode = `${categoryInfo.id}_${blockInfo.opcode}`;
+        }
+
 
         const blockJSON = {
             type: extendedOpcode,
@@ -3068,7 +3096,12 @@ class Runtime extends EventEmitter {
      * @property {string} [label] - the label for this opcode if `labelFn` is absent
      */
     getLabelForOpcode (extendedOpcode) {
-        const categoryAndOpcode = StringUtil.splitFirst(extendedOpcode, '_')[1];
+        let categoryAndOpcode;
+        if (this.getCurrentDeviceType()) {
+            categoryAndOpcode = StringUtil.splitFirst(extendedOpcode, '_')[1];
+        } else {
+            categoryAndOpcode = extendedOpcode;
+        }
         const [category, opcode] = StringUtil.splitFirst(categoryAndOpcode, '_');
 
         if (!(category && opcode)) return;

@@ -267,6 +267,7 @@ class VirtualMachine extends EventEmitter {
         this.runtime.dispose();
         this.editingTarget = null;
         this.emitTargetsUpdate(false /* Don't emit project change */);
+        this.extensionManager.clearDevice();
     }
 
     /**
@@ -475,7 +476,7 @@ class VirtualMachine extends EventEmitter {
 
         return zip.generateAsync({
             type: 'blob',
-            mimeType: 'application/x.scratch.sb3',
+            mimeType: 'application/x.openblock.ob',
             compression: 'DEFLATE',
             compressionOptions: {
                 level: 6 // Tradeoff between best speed (1) and best compression (9)
@@ -526,7 +527,7 @@ class VirtualMachine extends EventEmitter {
 
         return zip.generateAsync({
             type: typeof optZipType === 'string' ? optZipType : 'blob',
-            mimeType: 'application/x.scratch.sprite3',
+            mimeType: 'application/x.openblock.sprite3',
             compression: 'DEFLATE',
             compressionOptions: {
                 level: 6
@@ -565,6 +566,9 @@ class VirtualMachine extends EventEmitter {
         // Clear the current runtime
         this.clear();
 
+        if (typeof performance !== 'undefined') {
+            performance.mark('scratch-vm-deserialize-start');
+        }
         const runtime = this.runtime;
         const deserializePromise = function () {
             const projectVersion = projectJSON.projectVersion;
@@ -591,42 +595,98 @@ class VirtualMachine extends EventEmitter {
                 projectJSON
             )
         );
+        // return deserializePromise()
+        //     // Step1: Install device first.
+        //     .then(({targets}) => {
+        //         if (typeof performance !== 'undefined') {
+        //             performance.mark('scratch-vm-deserialize-end');
+        //             performance.measure('scratch-vm-deserialize',
+        //                 'scratch-vm-deserialize-start', 'scratch-vm-deserialize-end');
+        //         }
+        //         return this.installDevice(targets, projectJSON.device, projectJSON.deviceType,
+        //             projectJSON.pnpIdList, projectJSON.programMode, projectJSON.deviceExtensions);
+        //     })
+        //     // Step2: Install target and if there has deivce setting, set the editing target to stage incase there is
+        //     // device extensions block in sprite workspace, it will cause error.
+        //     .then(targets => this.installTargets(targets, projectJSON.extensions, true, !!projectJSON.device))
+        //     // Step3: Install device extension. it can get flyout blocks because the toolbox has been updated in the
+        //     // previous step. After loaded set the editing target to firset sprite if it has one.
+        //     .then(targets => this.installDeviceExtensions(projectJSON.deviceExtensions, targets));
     }
 
     /**
      * Sync install device extensions.
+     * @returns {Promise} Promise that resolves after the device extension has loaded
      */
     installDeviceExtensionsSync () {
         if (this.runtime._pendingDeviceExtensions) {
             if (this.runtime._pendingDeviceExtensions.length === 0) {
-                this.emit('installDeviceExtensionsSync.success');
                 return;
             }
-            this.extensionManager.loadDeviceExtension(this.runtime._pendingDeviceExtensions.shift())
-                .then(() => this.installDeviceExtensionsSync())
-                .catch(e => this.emit('installDeviceExtensionsSync.error', e));
+            return this.extensionManager.loadDeviceExtension(this.runtime._pendingDeviceExtensions.shift())
+                .then(() => this.installDeviceExtensionsSync());
+        }
+    }
+
+    /**
+     * Update targets and workspace after installed device extensions
+     * @param {Array.<Target>} targets - the targets to be installed
+     */
+    updateTargetsAndWorkspace (targets) {
+        if (targets) {
+            // After loaded all device extension. set the default target to first sprite.
+            if (targets.length > 1) {
+                this.editingTarget = targets[1];
+            } else {
+                this.editingTarget = targets[0];
+            }
+
+            this.emitTargetsUpdate(false /* Don't emit project change */);
+            this.emitWorkspaceUpdate();
+            this.runtime.setEditingTarget(this.editingTarget);
         }
     }
 
     /**
      * Install `deserialize` results: deviceExtensions.
      * @param {Array.<DeviceExtension>} deviceExtensions - the deivce extensions to be installed
-     * @returns {Promise} Promise that resolves after the device extensions has loaded
+     * @param {Array.<Target>} targets - the targets to be installed
+     * @returns {Promise} Promise that resolves after all device extensions has loaded
      */
-    installDeviceExtensions (deviceExtensions) {
-        return new Promise((resolve, reject) => {
-            this.runtime._pendingDeviceExtensions = deviceExtensions;
+    installDeviceExtensions (deviceExtensions, targets) {
+        if (!deviceExtensions) {
+            this.updateTargetsAndWorkspace(targets);
+            return Promise.resolve();
+        }
 
-            this.extensionManager.getDeviceExtensionsList().then(() => {
-                this.installDeviceExtensionsSync();
+        this.runtime._pendingDeviceExtensions = deviceExtensions;
+
+        return this.extensionManager.getDeviceExtensionsList()
+            .then(() => this.installDeviceExtensionsSync())
+            .then(() => {
+                this.updateTargetsAndWorkspace(targets);
             });
-            this.on('installDeviceExtensionsSync.success', () => {
-                resolve();
-            });
-            this.on('installDeviceExtensionsSync.error', err => {
-                reject(err);
-            });
-        });
+    }
+
+    /**
+     * Install `deserialize` results: device.
+     * @param {Array.<Target>} targets - the targets to be installed
+     * @param {string} device - the deivce to be installed
+     * @param {string} deviceType - the type of deivce to be installed
+     * @param {Array.<string>} pnpIdList - the pnp id filter list of the device
+     * @param {string} programMode - the program mode
+     * @returns {Promise} Promise that resolves after all device extensions has loaded
+     */
+    installDevice (targets, device = null, deviceType = null, pnpIdList = null, programMode = 'realtime') {
+        targets = targets.filter(target => !!target);
+
+        if (device) {
+            this.runtime.setRealtimeMode(programMode === 'realtime');
+
+            return this.extensionManager.loadDeviceURL(device, deviceType, pnpIdList)
+                .then(() => targets);
+        }
+        return targets;
     }
 
     /**
@@ -634,32 +694,13 @@ class VirtualMachine extends EventEmitter {
      * @param {Array.<Target>} targets - the targets to be installed
      * @param {ImportedExtensionsInfo} extensions - metadata about extensions used by these targets
      * @param {boolean} wholeProject - set to true if installing a whole project, as opposed to a single sprite.
-     * @param {Device} device - the deivce to be installed
-     * @param {DeviceType} deviceType - the type of deivce
-     * @param {Array.<string>} pnpIdList - a list of pnpid
-     * @param {string} programMode - if in realtime mode 'realtime' else 'upload'
-     * @param {Array.<DeviceExtension>} deviceExtensions - the deivce extensions to be installed
+     * @param {boolean} hasDevice - wether the project has device param
      * @returns {Promise} resolved once targets have been installed
      */
-    installTargets (targets, extensions, wholeProject, device = null,
-        deviceType = null, pnpIdList = null, programMode = 'realtime', deviceExtensions = null, projectJSON) {
+    // installTargets (targets, extensions, wholeProject, device = null,
+    //     deviceType = null, pnpIdList = null, programMode = 'realtime', deviceExtensions = null, projectJSON) {
+    installTargets (targets, extensions, wholeProject, hasDevice, projectJSON) {
         const allPromises = [];
-
-        if (device) {
-            allPromises.push(
-                new Promise((resolve, reject) => {
-                    this.extensionManager.loadDeviceURL(device, deviceType, pnpIdList)
-                        .then(() => {
-                            if (deviceExtensions) {
-                                this.installDeviceExtensions(deviceExtensions)
-                                    .then(() => resolve())
-                                    .catch(err => reject(err));
-                            }
-                            return resolve();
-                        })
-                        .catch(err => reject(err));
-                }));
-        }
 
         if (extensions) {
             if (extensions.extensionIDs) {
@@ -696,8 +737,6 @@ class VirtualMachine extends EventEmitter {
             }
         }
 
-        targets = targets.filter(target => !!target);
-
         return Promise.all(allPromises).then(() => {
             targets.forEach(target => {
                 this.runtime.addTarget(target);
@@ -713,7 +752,8 @@ class VirtualMachine extends EventEmitter {
             });
 
             // Select the first target for editing, e.g., the first sprite.
-            if (wholeProject && (targets.length > 1)) {
+            // If has device to be loaded, set stage as the editing target.
+            if (wholeProject && (targets.length > 1) && !hasDevice) {
                 this.editingTarget = targets[1];
             } else {
                 this.editingTarget = targets[0];
@@ -722,13 +762,12 @@ class VirtualMachine extends EventEmitter {
             if (!wholeProject) {
                 this.editingTarget.fixUpVariableReferences();
             }
-
-            // Update the VM user's knowledge of targets and blocks on the workspace.
             this.emitTargetsUpdate(false /* Don't emit project change */);
             this.emitWorkspaceUpdate();
             this.runtime.setEditingTarget(this.editingTarget);
             this.runtime.ioDevices.cloud.setStage(this.runtime.getTargetForStage());
-            this.runtime.setRealtimeMode(programMode === 'realtime');
+
+            return targets;
         });
     }
 
@@ -1560,7 +1599,6 @@ class VirtualMachine extends EventEmitter {
                             ${workspaceComments.map(c => c.toXML()).join()}
                             ${this.editingTarget.blocks.toXML(this.editingTarget.comments)}
                         </xml>`;
-
         this.emit('workspaceUpdate', {xml: xmlString});
     }
 

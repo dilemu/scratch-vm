@@ -332,7 +332,6 @@ class Blocks {
             for (let i = 0; i < newBlocks.length; i++) {
                 this.createBlock(newBlocks[i]);
             }
-            this.runtime.requestCodeUpdate();
             break;
         }
         case 'change':
@@ -353,6 +352,7 @@ class Blocks {
                 newInput: e.newInputName,
                 newCoordinate: e.newCoordinate
             });
+            this.runtime.requestCodeUpdate();
             break;
         case 'toolBoxFinish':
             this.runtime.emitToolboxUploadFinish();
@@ -668,7 +668,7 @@ class Blocks {
             let isSpriteLocalVariable = false;
             if (block.opcode === 'data_variable' && this.runtime.getTargetForStage()) {
                 isSpriteLocalVariable = !(this.runtime.getTargetForStage().variables[block.fields.VARIABLE.id]);
-            } else if (block.opcode === 'data_listcontents') {
+            } else if (block.opcode === 'data_listcontents' && this.runtime.getTargetForStage()) {
                 isSpriteLocalVariable = !(this.runtime.getTargetForStage().variables[block.fields.LIST.id]);
             }
 

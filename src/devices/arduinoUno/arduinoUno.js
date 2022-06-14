@@ -4,18 +4,20 @@ const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const ProgramModeType = require('../../extension-support/program-mode-type');
 
-const ArduinoPeripheral = require('../arduinoCommen/arduino-peripheral');
+const ArduinoPeripheral = require('../common/arduino-peripheral');
 
 /**
  * The list of USB device filters.
  * @readonly
  */
 const PNPID_LIST = [
-    // https://github.com/arduino/Arduino/blob/1.8.0/hardware/arduino/avr/boards.txt#L268-L275
-    'USB\\VID_2341&PID_0036',
-    'USB\\VID_2341&PID_8036',
-    'USB\\VID_2A03&PID_0036',
-    'USB\\VID_2A03&PID_8036'
+    // https://github.com/arduino/Arduino/blob/1.8.0/hardware/arduino/avr/boards.txt#L51-L58
+    'USB\\VID_2341&PID_0043',
+    'USB\\VID_2341&PID_0001',
+    'USB\\VID_2A03&PID_0043',
+    'USB\\VID_2341&PID_0243',
+    // For chinese clones that use CH340
+    'USB\\VID_1A86&PID_7523'
 ];
 
 /**
@@ -34,7 +36,8 @@ const SERIAL_CONFIG = {
  */
 const DIVECE_OPT = {
     type: 'arduino',
-    fqbn: 'arduino:avr:leonardo'
+    fqbn: 'arduino:avr:uno',
+    firmware: 'arduinoUno.standardFirmata.ino.hex'
 };
 
 const Pins = {
@@ -95,15 +98,15 @@ const InterrupMode = {
 };
 
 const DataType = {
-    WholeNumber: 'WHOLE_NUMBER',
+    Integer: 'INTEGER',
     Decimal: 'DECIMAL',
     String: 'STRING'
 };
 
 /**
- * Manage communication with a Arduino Leonardo peripheral over a OpenBlock Link client socket.
+ * Manage communication with a Arduino Uno peripheral over a OpenBlock Link client socket.
  */
-class ArduinoLeonardo extends ArduinoPeripheral{
+class ArduinoUno extends ArduinoPeripheral{
     /**
      * Construct a Arduino communication object.
      * @param {Runtime} runtime - the OpenBlock runtime
@@ -116,14 +119,14 @@ class ArduinoLeonardo extends ArduinoPeripheral{
 }
 
 /**
- * OpenBlock blocks to interact with a Arduino Leonardo peripheral.
+ * OpenBlock blocks to interact with a Arduino Uno peripheral.
  */
-class OpenBlockArduinoLeonardoDevice {
+class OpenBlockArduinoUnoDevice {
     /**
      * @return {string} - the ID of this extension.
      */
-    static get DEVICE_ID () {
-        return 'arduinoLeonardo';
+    get DEVICE_ID () {
+        return 'arduinoUno';
     }
 
     get PINS_MENU () {
@@ -215,7 +218,7 @@ class OpenBlockArduinoLeonardoDevice {
         return [
             {
                 text: formatMessage({
-                    id: 'arduinoLeonardo.modeMenu.input',
+                    id: 'arduinoUno.modeMenu.input',
                     default: 'input',
                     description: 'label for input pin mode'
                 }),
@@ -223,7 +226,7 @@ class OpenBlockArduinoLeonardoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoLeonardo.modeMenu.output',
+                    id: 'arduinoUno.modeMenu.output',
                     default: 'output',
                     description: 'label for output pin mode'
                 }),
@@ -231,72 +234,11 @@ class OpenBlockArduinoLeonardoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoLeonardo.modeMenu.inputPullup',
+                    id: 'arduinoUno.modeMenu.inputPullup',
                     default: 'input-pullup',
                     description: 'label for input-pullup pin mode'
                 }),
                 value: Mode.InputPullup
-            }
-        ];
-    }
-
-    get DIGITAL_PINS_MENU () {
-        return [
-            {
-                text: '0',
-                value: Pins.D0
-            },
-            {
-                text: '1',
-                value: Pins.D1
-            },
-            {
-                text: '2',
-                value: Pins.D2
-            },
-            {
-                text: '3',
-                value: Pins.D3
-            },
-            {
-                text: '4',
-                value: Pins.D4
-            },
-            {
-                text: '5',
-                value: Pins.D5
-            },
-            {
-                text: '6',
-                value: Pins.D6
-            },
-            {
-                text: '7',
-                value: Pins.D7
-            },
-            {
-                text: '8',
-                value: Pins.D8
-            },
-            {
-                text: '9',
-                value: Pins.D9
-            },
-            {
-                text: '10',
-                value: Pins.D10
-            },
-            {
-                text: '11',
-                value: Pins.D11
-            },
-            {
-                text: '12',
-                value: Pins.D12
-            },
-            {
-                text: '13',
-                value: Pins.D13
             }
         ];
     }
@@ -334,7 +276,7 @@ class OpenBlockArduinoLeonardoDevice {
         return [
             {
                 text: formatMessage({
-                    id: 'arduinoLeonardo.levelMenu.high',
+                    id: 'arduinoUno.levelMenu.high',
                     default: 'high',
                     description: 'label for high level'
                 }),
@@ -342,7 +284,7 @@ class OpenBlockArduinoLeonardoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoLeonardo.levelMenu.low',
+                    id: 'arduinoUno.levelMenu.low',
                     default: 'low',
                     description: 'label for low level'
                 }),
@@ -382,14 +324,6 @@ class OpenBlockArduinoLeonardoDevice {
 
     get INTERRUPT_PINS_MENU () {
         return [
-            {
-                text: '0',
-                value: Pins.D0
-            },
-            {
-                text: '1',
-                value: Pins.D1
-            },
             {
                 text: '2',
                 value: Pins.D2
@@ -496,15 +430,15 @@ class OpenBlockArduinoLeonardoDevice {
         return [
             {
                 text: formatMessage({
-                    id: 'arduinoLeonardo.dataTypeMenu.wholeNumber',
-                    default: 'whole number',
-                    description: 'label for whole number'
+                    id: 'arduinoUno.dataTypeMenu.integer',
+                    default: 'integer',
+                    description: 'label for integer'
                 }),
-                value: DataType.WholeNumber
+                value: DataType.Integer
             },
             {
                 text: formatMessage({
-                    id: 'arduinoLeonardo.dataTypeMenu.decimal',
+                    id: 'arduinoUno.dataTypeMenu.decimal',
                     default: 'decimal',
                     description: 'label for decimal number'
                 }),
@@ -512,7 +446,7 @@ class OpenBlockArduinoLeonardoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoLeonardo.dataTypeMenu.string',
+                    id: 'arduinoUno.dataTypeMenu.string',
                     default: 'string',
                     description: 'label for string'
                 }),
@@ -533,9 +467,8 @@ class OpenBlockArduinoLeonardoDevice {
          */
         this.runtime = runtime;
 
-        // Create a new Arduino leonardo peripheral instance
-        this._peripheral = new ArduinoLeonardo(this.runtime,
-            OpenBlockArduinoLeonardoDevice.DEVICE_ID, originalDeviceId);
+        // Create a new Arduino uno peripheral instance
+        this._peripheral = new ArduinoUno(this.runtime, this.DEVICE_ID, originalDeviceId);
     }
 
     /**
@@ -546,9 +479,9 @@ class OpenBlockArduinoLeonardoDevice {
             {
                 id: 'pin',
                 name: formatMessage({
-                    id: 'arduinoLeonardo.category.pins',
+                    id: 'arduinoUno.category.pins',
                     default: 'Pins',
-                    description: 'The name of the arduino leonardo device pin category'
+                    description: 'The name of the arduino uno device pin category'
                 }),
                 color1: '#4C97FF',
                 color2: '#3373CC',
@@ -558,9 +491,9 @@ class OpenBlockArduinoLeonardoDevice {
                     {
                         opcode: 'setPinMode',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.pins.setPinMode',
+                            id: 'arduinoUno.pins.setPinMode',
                             default: 'set pin [PIN] mode [MODE]',
-                            description: 'arduinoLeonardo set pin mode'
+                            description: 'arduinoUno set pin mode'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -579,9 +512,9 @@ class OpenBlockArduinoLeonardoDevice {
                     {
                         opcode: 'setDigitalOutput',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.pins.setDigitalOutput',
+                            id: 'arduinoUno.pins.setDigitalOutput',
                             default: 'set digital pin [PIN] out [LEVEL]',
-                            description: 'arduinoLeonardo set digital pin out'
+                            description: 'arduinoUno set digital pin out'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -601,9 +534,9 @@ class OpenBlockArduinoLeonardoDevice {
 
                         opcode: 'setPwmOutput',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.pins.setPwmOutput',
+                            id: 'arduinoUno.pins.setPwmOutput',
                             default: 'set pwm pin [PIN] out [OUT]',
-                            description: 'arduinoLeonardo set pwm pin out'
+                            description: 'arduinoUno set pwm pin out'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -622,15 +555,15 @@ class OpenBlockArduinoLeonardoDevice {
                     {
                         opcode: 'readDigitalPin',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.pins.readDigitalPin',
+                            id: 'arduinoUno.pins.readDigitalPin',
                             default: 'read digital pin [PIN]',
-                            description: 'arduinoLeonardo read digital pin'
+                            description: 'arduinoUno read digital pin'
                         }),
                         blockType: BlockType.BOOLEAN,
                         arguments: {
                             PIN: {
                                 type: ArgumentType.STRING,
-                                menu: 'digitalPins',
+                                menu: 'pins',
                                 defaultValue: Pins.D0
                             }
                         }
@@ -638,9 +571,9 @@ class OpenBlockArduinoLeonardoDevice {
                     {
                         opcode: 'readAnalogPin',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.pins.readAnalogPin',
+                            id: 'arduinoUno.pins.readAnalogPin',
                             default: 'read analog pin [PIN]',
-                            description: 'arduinoLeonardo read analog pin'
+                            description: 'arduinoUno read analog pin'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -656,9 +589,9 @@ class OpenBlockArduinoLeonardoDevice {
 
                         opcode: 'setServoOutput',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.pins.setServoOutput',
+                            id: 'arduinoUno.pins.setServoOutput',
                             default: 'set servo pin [PIN] out [OUT]',
-                            description: 'arduinoLeonardo set servo pin out'
+                            description: 'arduinoUno set servo pin out'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -668,7 +601,7 @@ class OpenBlockArduinoLeonardoDevice {
                                 defaultValue: Pins.D3
                             },
                             OUT: {
-                                type: ArgumentType.ANGLE,
+                                type: ArgumentType.HALF_ANGLE,
                                 defaultValue: '90'
                             }
                         }
@@ -678,9 +611,9 @@ class OpenBlockArduinoLeonardoDevice {
 
                         opcode: 'attachInterrupt',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.pins.attachInterrupt',
+                            id: 'arduinoUno.pins.attachInterrupt',
                             default: 'attach interrupt pin [PIN] mode [MODE] executes',
-                            description: 'arduinoLeonardo attach interrupt'
+                            description: 'arduinoUno attach interrupt'
                         }),
                         blockType: BlockType.CONDITIONAL,
                         arguments: {
@@ -701,9 +634,9 @@ class OpenBlockArduinoLeonardoDevice {
 
                         opcode: 'detachInterrupt',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.pins.detachInterrupt',
+                            id: 'arduinoUno.pins.detachInterrupt',
                             default: 'detach interrupt pin [PIN]',
-                            description: 'arduinoLeonardo detach interrupt'
+                            description: 'arduinoUno detach interrupt'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -722,9 +655,6 @@ class OpenBlockArduinoLeonardoDevice {
                     },
                     mode: {
                         items: this.MODE_MENU
-                    },
-                    digitalPins: {
-                        items: this.DIGITAL_PINS_MENU
                     },
                     analogPins: {
                         items: this.ANALOG_PINS_MENU
@@ -829,9 +759,9 @@ class OpenBlockArduinoLeonardoDevice {
             {
                 id: 'data',
                 name: formatMessage({
-                    id: 'arduinoLeonardo.category.data',
+                    id: 'arduinoUno.category.data',
                     default: 'Data',
-                    description: 'The name of the arduino leonardo device data category'
+                    description: 'The name of the arduino uno device data category'
                 }),
                 color1: '#CF63CF',
                 color2: '#C94FC9',
@@ -840,9 +770,9 @@ class OpenBlockArduinoLeonardoDevice {
                     {
                         opcode: 'dataMap',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.data.dataMap',
+                            id: 'arduinoUno.data.dataMap',
                             default: 'map [DATA] from ([ARG0], [ARG1]) to ([ARG2], [ARG3])',
-                            description: 'arduinoLeonardo data map'
+                            description: 'arduinoUno data map'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -869,13 +799,12 @@ class OpenBlockArduinoLeonardoDevice {
                         },
                         programMode: [ProgramModeType.UPLOAD]
                     },
-                    '---',
                     {
                         opcode: 'dataConstrain',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.data.dataConstrain',
+                            id: 'arduinoUno.data.dataConstrain',
                             default: 'constrain [DATA] between ([ARG0], [ARG1])',
-                            description: 'arduinoLeonardo data constrain'
+                            description: 'arduinoUno data constrain'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -894,12 +823,13 @@ class OpenBlockArduinoLeonardoDevice {
                         },
                         programMode: [ProgramModeType.UPLOAD]
                     },
+                    '---',
                     {
                         opcode: 'dataConvert',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.data.dataConvert',
+                            id: 'arduinoUno.data.dataConvert',
                             default: 'convert [DATA] to [TYPE]',
-                            description: 'arduinoLeonardo data convert'
+                            description: 'arduinoUno data convert'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -910,7 +840,7 @@ class OpenBlockArduinoLeonardoDevice {
                             TYPE: {
                                 type: ArgumentType.STRING,
                                 menu: 'dataType',
-                                defaultValue: DataType.WholeNumber
+                                defaultValue: DataType.Integer
                             }
                         },
                         programMode: [ProgramModeType.UPLOAD]
@@ -918,9 +848,9 @@ class OpenBlockArduinoLeonardoDevice {
                     {
                         opcode: 'dataConvertASCIICharacter',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.data.dataConvertASCIICharacter',
+                            id: 'arduinoUno.data.dataConvertASCIICharacter',
                             default: 'convert [DATA] to ASCII character',
-                            description: 'arduinoLeonardo data convert to ASCII character'
+                            description: 'arduinoUno data convert to ASCII character'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -934,9 +864,9 @@ class OpenBlockArduinoLeonardoDevice {
                     {
                         opcode: 'dataConvertASCIINumber',
                         text: formatMessage({
-                            id: 'arduinoLeonardo.data.dataConvertASCIINumber',
+                            id: 'arduinoUno.data.dataConvertASCIINumber',
                             default: 'convert [DATA] to ASCII nubmer',
-                            description: 'arduinoLeonardo data convert to ASCII nubmer'
+                            description: 'arduinoUno data convert to ASCII nubmer'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -1016,4 +946,4 @@ class OpenBlockArduinoLeonardoDevice {
     }
 }
 
-module.exports = OpenBlockArduinoLeonardoDevice;
+module.exports = OpenBlockArduinoUnoDevice;

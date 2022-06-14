@@ -1,9 +1,9 @@
 const formatMessage = require('format-message');
-const Buffer = require('buffer').Buffer;
 
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
-const Serialport = require('../../io/serialport');
+
+const CommonPeripheral = require('../common/common-peripheral');
 
 /**
 * The list of USB device filters.
@@ -28,7 +28,7 @@ const SERIAL_CONFIG = {
  * @readonly
  */
 const DIVECE_OPT = {
-    type: 'microbitV2'
+    type: 'microbit'
 };
 
 const LedState = {
@@ -87,187 +87,29 @@ const Level = {
 };
 
 /**
- * Manage communication with a Microbit V2 peripheral over a OpenBlock Link client socket.
+ * Manage communication with a Microbit peripheral over a OpenBlock Link client socket.
  */
-class MicrobitV2{
-
+class Microbit extends CommonPeripheral{
     /**
-     * Construct a Microbit V2 communication object.
+     * Construct a Microbit communication object.
      * @param {Runtime} runtime - the OpenBlock runtime
-     * @param {string} deviceId - the id of the extension
+     * @param {string} deviceId - the id of the deivce
+     * @param {string} originalDeviceId - the original id of the peripheral, like xxx_arduinoUno
      */
-    constructor (runtime, deviceId) {
-        /**
-         * The OpenBlock runtime used to trigger the green flag button.
-         * @type {Runtime}
-         * @private
-         */
-        this._runtime = runtime;
-
-        /**
-         * The serialport connection socket for reading/writing peripheral data.
-         * @type {SERIALPORT}
-         * @private
-         */
-        this._serialport = null;
-        this._runtime.registerPeripheralExtension(deviceId, this);
-        this._runtime.setRealtimeBaudrate(SERIAL_CONFIG.baudRate);
-
-        /**
-         * The id of the extension this peripheral belongs to.
-         */
-        this._deviceId = deviceId;
-
-        /**
-        * Pending data list. If busy is set when send, the data will push into this array to
-        * waitting to be sended.
-        */
-        this._pendingData = [];
-
-        this.reset = this.reset.bind(this);
-        this._onConnect = this._onConnect.bind(this);
-        this._onMessage = this._onMessage.bind(this);
-    }
-
-    /**
-     * Called by the runtime when user wants to upload code to a peripheral.
-     * @param {string} code - the code want to upload.
-     */
-    upload (code) {
-        const base64Str = Buffer.from(code).toString('base64');
-        this._serialport.upload(base64Str, DIVECE_OPT, 'base64');
-    }
-
-    /**
-     * Called by the runtime when user wants to upload realtime firmware to a peripheral.
-     */
-    uploadFirmware () {
-    }
-
-    /**
-     * Called by the runtime when user wants to scan for a peripheral.
-     * @param {Array.<string>} pnpidList - the array of pnp id list
-     * @param {bool} listAll - wether list all connectable device
-     */
-    scan (pnpidList, listAll) {
-        if (this._serialport) {
-            this._serialport.disconnect();
-        }
-        this._serialport = new Serialport(this._runtime, this._deviceId, {
-            filters: {
-                pnpid: listAll ? ['*'] : (pnpidList ? pnpidList : PNPID_LIST)
-            }
-        }, this._onConnect, this.reset);
-    }
-
-    /**
-     * Called by the runtime when user wants to connect to a certain peripheral.
-     * @param {number} id - the id of the peripheral to connect to.
-     * @param {?number} baudrate - the baudrate.
-     */
-    connect (id, baudrate = null) {
-        const config = SERIAL_CONFIG;
-        if (baudrate) {
-            config.baudRate = baudrate;
-        }
-        if (this._serialport) {
-            this._serialport.connectPeripheral(id, {config: config});
-        }
-    }
-
-    /**
-     * Disconnect from the peripheral.
-     */
-    disconnect () {
-        if (this._serialport) {
-            this._serialport.disconnect();
-        }
-
-        this.reset();
-    }
-
-    /**
-     * Reset all the state and timeout/interval ids.
-     */
-    reset () {
-    }
-
-    /**
-     * Return true if connected to the peripheral.
-     * @return {boolean} - whether the peripheral is connected.
-     */
-    isConnected () {
-        let connected = false;
-        if (this._serialport) {
-            connected = this._serialport.isConnected();
-        }
-        return connected;
-    }
-
-    /**
-     * Set baudrate of the peripheral serialport.
-     * @param {number} baudrate - the baudrate.
-     */
-    setBaudrate (baudrate) {
-        this._serialport.setBaudrate(baudrate);
-    }
-
-    /**
-     * Write data to the peripheral serialport.
-     * @param {string} data - the data to write.
-     */
-    write (data) {
-        if (!this.isConnected()) return;
-
-        const base64Str = Buffer.from(data).toString('base64');
-        this._serialport.write(base64Str, 'base64');
-    }
-
-    /**
-     * Send a message to the peripheral Serialport socket.
-     * @param {Uint8Array} message - the message to write
-     */
-    send () {
-    }
-
-    /**
-     * Starts reading data from peripheral after serialport has connected to it.
-     * @private
-     */
-    _onConnect () {
-        this._serialport.read(this._onMessage);
-    }
-
-    /**
-     * Process the sensor data from the incoming serialport characteristic.
-     * @param {object} base64 - the incoming serialport data.
-     * @private
-     */
-    _onMessage () {
-    }
-
-    /**
-     * @param {PIN} pin - the pin string to parse.
-     * @return {number} - the pin number.
-     */
-    parsePin (pin) {
-        if (pin.charAt(0) === 'A') {
-            return parseInt(pin.slice(1), 10) + 14;
-        }
-        return parseInt(pin, 10);
-
+    constructor (runtime, deviceId, originalDeviceId) {
+        super(runtime, deviceId, originalDeviceId, PNPID_LIST, SERIAL_CONFIG, DIVECE_OPT);
     }
 }
 
 /**
- * OpenBlock blocks to interact with a Microbit V2 peripheral.
+ * OpenBlock blocks to interact with a Microbit peripheral.
  */
-class OpenBlockMicrobitV2Device {
+class OpenBlockMicrobitDevice {
     /**
-     * @return {string} - the ID of this extension.
+     * @return {string} - the ID of this deivce.
      */
-    static get DEVICE_ID () {
-        return 'microbitV2';
+    get DEVICE_ID () {
+        return 'microbit';
     }
 
     get LEDSTATE_MENU () {
@@ -614,18 +456,19 @@ class OpenBlockMicrobitV2Device {
     }
 
     /**
-     * Construct a set of Microbit V2 blocks.
+     * Construct a set of Microbit blocks.
      * @param {Runtime} runtime - the OpenBlock runtime.
+     * @param {string} originalDeviceId - the original id of the peripheral, like xxx_arduinoUno
      */
-    constructor (runtime) {
+    constructor (runtime, originalDeviceId) {
         /**
          * The OpenBlock runtime.
          * @type {Runtime}
          */
         this.runtime = runtime;
 
-        // Create a new Microbit V2 peripheral instance
-        this._peripheral = new MicrobitV2(this.runtime, OpenBlockMicrobitV2Device.DEVICE_ID);
+        // Create a new Microbit peripheral instance
+        this._peripheral = new Microbit(this.runtime, this.DEVICE_ID, originalDeviceId);
     }
 
     /**
@@ -1130,8 +973,8 @@ class OpenBlockMicrobitV2Device {
                 description: 'The name of the microbit device console category'
             }),
             color1: '#FF3399',
-            color2: '#FF3399',
-            color3: '#FF3399',
+            color2: '#CC297A',
+            color3: '#CC297A',
 
             blocks: [
                 {
@@ -1156,4 +999,4 @@ class OpenBlockMicrobitV2Device {
     }
 }
 
-module.exports = OpenBlockMicrobitV2Device;
+module.exports = OpenBlockMicrobitDevice;

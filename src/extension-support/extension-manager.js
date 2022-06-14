@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const loadjs = require('loadjs');
+const formatMessage = require('format-message');
 
 const dispatch = require('../dispatch/central-dispatch');
 const log = require('../util/log');
@@ -7,11 +8,8 @@ const maybeFormatMessage = require('../util/maybe-format-message');
 
 const BlockType = require('./block-type');
 
-// Local device server address
-const localDevicesUrl = 'http://127.0.0.1:20122/';
-
-// Local device extension server address
-const localDeviceExtensionsUrl = 'http://127.0.0.1:20120/';
+// Local resources server address
+const localResourcesServerUrl = 'https://127.0.0.1:20112/';
 
 // These extensions are currently built into the VM repository but should not be loaded at startup.
 // TODO: move these out into a separate repository?
@@ -41,24 +39,30 @@ const builtinExtensions = {
 };
 
 const builtinDevices = {
-    arduinoUno: () => require('../devices/arduinoUno'),
-    arduinoUnoUltra: () => require('../devices/arduinoUnoUltra'), // Add A6, A7 pins some customized board
-    arduinoNano: () => require('../devices/arduinoNano'),
-    arduinoMini: () => require('../devices/arduinoMini'),
-    arduinoLeonardo: () => require('../devices/arduinoLeonardo'),
-    arduinoMega2560: () => require('../devices/arduinoMega2560'),
-    arduinoEsp32: () => require('../devices/arduinoEsp32'),
-    arduinoEsp8266: () => require('../devices/arduinoEsp8266'),
-    microbit: () => require('../devices/microbit'),
-    makeyMakey: () => require('../devices/makeymakey'),
-    microbitV2: () => require('../devices/microbitV2')
+    // Arduino Uno
+    arduinoUno: () => require('../devices/arduinoUno/arduinoUno'),
+    arduinoNano: () => require('../devices/arduinoUno/arduinoNano'),
+    arduinoUnoUltra: () => require('../devices/arduinoUno/arduinoUnoUltra'),
+    arduinoUnoSE: () => require('../devices/arduinoUno/arduinoUnoSE'),
+    // Arduino Leonardo
+    arduinoLeonardo: () => require('../devices/arduinoLeonardo/arduinoLeonardo'),
+    makeyMakey: () => require('../devices/arduinoLeonardo/makeyMakey'),
+    // Arduino Mega2560
+    arduinoMega2560: () => require('../devices/arduinoMega2560/arduinoMega2560'),
+    // Esp32
+    arduinoEsp32: () => require('../devices/arduinoEsp32/arduinoEsp32'),
+    // Esp8266
+    arduinoEsp8266: () => require('../devices/arduinoEsp8266/arduinoEsp8266'),
+    arduinoEsp8266NodeMCU: () => require('../devices/arduinoEsp8266/arduinoEsp8266NodeMCU'),
+    // Microbit
+    microbit: () => require('../devices/microbit/microbit'),
+    microbitV2: () => require('../devices/microbit/microbitV2')
 
-    // todo transform these to device extension
+    // TODO: transform these to device extension.
     // wedo2: () => require('../extensions/scratch3_wedo2'),
     // ev3: () => require('../extensions/scratch3_ev3'),
     // boost: () => require('../extensions/scratch3_boost'),
-    // gdxfor: () => require('../extensions/scratch3_gdx_for'),
-    // makeymakey: () => require('../extensions/scratch3_makeymakey')
+    // gdxfor: () => require('../extensions/scratch3_gdx_for')
 };
 
 /**
@@ -231,14 +235,13 @@ class ExtensionManager {
      */
     getDeviceList () {
         return new Promise(resolve => {
-            return resolve();
-            fetch(localDevicesUrl)
+            fetch(`${localResourcesServerUrl}devices/${formatMessage.setup().locale}.json`)
                 .then(response => response.json())
                 .then(devices => {
                     devices = devices.map(dev => {
-                        dev.iconURL = localDevicesUrl + dev.iconURL;
-                        dev.connectionIconURL = localDevicesUrl + dev.connectionIconURL;
-                        dev.connectionSmallIconURL = localDevicesUrl + dev.connectionSmallIconURL;
+                        dev.iconURL = localResourcesServerUrl + dev.iconURL;
+                        dev.connectionIconURL = localResourcesServerUrl + dev.connectionIconURL;
+                        dev.connectionSmallIconURL = localResourcesServerUrl + dev.connectionSmallIconURL;
                         return dev;
                     });
                     return resolve(devices);
@@ -258,6 +261,11 @@ class ExtensionManager {
      * @returns {Promise} resolved once the device is loaded and initialized or rejected on failure
      */
     loadDeviceURL (deviceId, deviceType, pnpidList) {
+        // if no deviceid return
+        if (deviceId === null) {
+            return Promise.resolve();
+        }
+
         const realDeviceId = this.runtime.analysisRealDeviceId(deviceId);
 
         if (builtinDevices.hasOwnProperty(realDeviceId)) {
@@ -266,6 +274,9 @@ class ExtensionManager {
                 log.warn(message);
                 return Promise.resolve();
             }
+
+            // Try to disconnect the old device before change device.
+            this.runtime.disconnectPeripheral(this.runtime.getCurrentDevice());
 
             this.runtime.setDevice(deviceId);
             this.runtime.setDeviceType(deviceType);
@@ -285,28 +296,34 @@ class ExtensionManager {
 
             return Promise.resolve();
         } else if (realDeviceId === 'unselectDevice') { // unload the device return to pure realtime programming mode.
-            this.runtime.setDevice(null);
-            this.runtime.setDeviceType(null);
-            this.runtime.setPnpIdList([]);
-            this.runtime.clearMonitor();
-            this._loadedDevice.clear();
-
-            this._loadedDevice.set(deviceId, null);
-
-            // Clear current extentions.
-            this.runtime.clearCurrentExtension();
-            this._loadedExtensions.clear();
-            this.unloadAllDeviceExtension();
-
-            this.runtime.emit(this.runtime.constructor.DEVICE_ADDED, {
-                device: null,
-                categoryInfoArray: []
-            });
-
+            this.clearDevice();
             return Promise.resolve();
         }
 
         return Promise.reject(`Error while load device can not find device: ${deviceId}`);
+    }
+
+    /**
+     * Clear curent device
+     */
+    clearDevice () {
+        this.runtime.disconnectPeripheral(this.runtime.getCurrentDevice());
+
+        this.runtime.setDevice(null);
+        this.runtime.setDeviceType(null);
+        this.runtime.setPnpIdList([]);
+        this.runtime.clearMonitor();
+        this._loadedDevice.clear();
+
+        // Clear current extentions.
+        this.runtime.clearCurrentExtension();
+        this._loadedExtensions.clear();
+        this.unloadAllDeviceExtension();
+
+        this.runtime.emit(this.runtime.constructor.DEVICE_ADDED, {
+            device: null,
+            categoryInfoArray: []
+        });
     }
 
     /**
@@ -315,11 +332,11 @@ class ExtensionManager {
      */
     getDeviceExtensionsList () {
         return new Promise(resolve => {
-            fetch(localDeviceExtensionsUrl)
+            fetch(`${localResourcesServerUrl}extensions/${formatMessage.setup().locale}.json`)
                 .then(response => response.json())
                 .then(extensions => {
                     extensions = extensions.map(extension => {
-                        extension.iconURL = localDeviceExtensionsUrl + extension.iconURL;
+                        extension.iconURL = localResourcesServerUrl + extension.iconURL;
                         if (this.isDeviceExtensionLoaded(extension.extensionId)) {
                             extension.isLoaded = true;
                         }
@@ -356,7 +373,7 @@ class ExtensionManager {
                     `can not find device extension: ${deviceExtensionId}`);
             }
 
-            const url = localDeviceExtensionsUrl;
+            const url = localResourcesServerUrl;
             const toolboxUrl = url + deviceExtension.toolbox;
             const blockUrl = url + deviceExtension.blocks;
             const generatorUrl = url + deviceExtension.generator;
@@ -367,9 +384,10 @@ class ExtensionManager {
                     const toolboxXML = addToolbox(); // eslint-disable-line no-undef
                     this.runtime.addDeviceExtension(deviceExtensionId, toolboxXML, deviceExtension.library);
 
-                    const addExts = {addBlocks, addGenerator, addMsg};// eslint-disable-line no-undef
+                    // eslint-disable-next-line no-undef
+                    const deviceExtensionsRegister = {addBlocks, addGenerator, addMsg};
 
-                    this.runtime.emit(this.runtime.constructor.DEVICE_EXTENSION_ADDED, addExts);
+                    this.runtime.emit(this.runtime.constructor.DEVICE_EXTENSION_ADDED, deviceExtensionsRegister);
                     return resolve();
                 })
                 .catch(err => reject(`Error while load device extension ` +
