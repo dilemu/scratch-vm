@@ -1,6 +1,6 @@
 {
   "name": "delightmom-scratch-vm",
-  "version": "0.1.35",
+  "version": "0.2.2",
   "description": "Virtual Machine for Delightmom",
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",
@@ -20,8 +20,7 @@
     "tap:integration": "",
     "test": "npm run lint && npm run docs && npm run tap",
     "watch": "webpack --progress --colors --watch",
-    "version": "json -f package.json -I -e \"this.repository.sha = '$(git log -n1 --pretty=format:%H)'\"",
-    "prepublish": "in-publish && npm run build || not-in-publish"
+    "version": "json -f package.json -I -e \"this.repository.sha = '$(git log -n1 --pretty=format:%H)'\""
   },
   "dependencies": {
     "@tensorflow-models/knn-classifier": "^1.2.2",
