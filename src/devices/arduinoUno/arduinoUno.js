@@ -489,70 +489,6 @@ class OpenBlockArduinoUnoDevice {
 
                 blocks: [
                     {
-                        opcode: 'setPinMode',
-                        text: formatMessage({
-                            id: 'arduinoUno.pins.setPinMode',
-                            default: 'set pin [PIN] mode [MODE]',
-                            description: 'arduinoUno set pin mode'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            PIN: {
-                                type: ArgumentType.STRING,
-                                menu: 'pins',
-                                defaultValue: Pins.D0
-                            },
-                            MODE: {
-                                type: ArgumentType.STRING,
-                                menu: 'mode',
-                                defaultValue: Mode.Input
-                            }
-                        }
-                    },
-                    {
-                        opcode: 'setDigitalOutput',
-                        text: formatMessage({
-                            id: 'arduinoUno.pins.setDigitalOutput',
-                            default: 'set digital pin [PIN] out [LEVEL]',
-                            description: 'arduinoUno set digital pin out'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            PIN: {
-                                type: ArgumentType.STRING,
-                                menu: 'pins',
-                                defaultValue: Pins.D0
-                            },
-                            LEVEL: {
-                                type: ArgumentType.STRING,
-                                menu: 'level',
-                                defaultValue: Level.High
-                            }
-                        }
-                    },
-                    {
-
-                        opcode: 'setPwmOutput',
-                        text: formatMessage({
-                            id: 'arduinoUno.pins.setPwmOutput',
-                            default: 'set pwm pin [PIN] out [OUT]',
-                            description: 'arduinoUno set pwm pin out'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            PIN: {
-                                type: ArgumentType.STRING,
-                                menu: 'pwmPins',
-                                defaultValue: Pins.D3
-                            },
-                            OUT: {
-                                type: ArgumentType.UINT8_NUMBER,
-                                defaultValue: '255'
-                            }
-                        }
-                    },
-                    '---',
-                    {
                         opcode: 'readDigitalPin',
                         text: formatMessage({
                             id: 'arduinoUno.pins.readDigitalPin',
@@ -564,7 +500,7 @@ class OpenBlockArduinoUnoDevice {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'pins',
-                                defaultValue: Pins.D0
+                                defaultValue: Pins.D2
                             }
                         }
                     },
@@ -587,11 +523,11 @@ class OpenBlockArduinoUnoDevice {
                     '---',
                     {
 
-                        opcode: 'setServoOutput',
+                        opcode: 'setPwmOutput',
                         text: formatMessage({
-                            id: 'arduinoUno.pins.setServoOutput',
-                            default: 'set servo pin [PIN] out [OUT]',
-                            description: 'arduinoUno set servo pin out'
+                            id: 'arduinoUno.pins.setPwmOutput',
+                            default: 'set pwm pin [PIN] out [OUT]',
+                            description: 'arduinoUno set pwm pin out'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -601,53 +537,118 @@ class OpenBlockArduinoUnoDevice {
                                 defaultValue: Pins.D3
                             },
                             OUT: {
-                                type: ArgumentType.HALF_ANGLE,
-                                defaultValue: '90'
+                                type: ArgumentType.UINT8_NUMBER,
+                                defaultValue: '200'
                             }
                         }
                     },
-                    '---',
                     {
-
-                        opcode: 'attachInterrupt',
+                        opcode: 'setDigitalOutput',
                         text: formatMessage({
-                            id: 'arduinoUno.pins.attachInterrupt',
-                            default: 'attach interrupt pin [PIN] mode [MODE] executes',
-                            description: 'arduinoUno attach interrupt'
-                        }),
-                        blockType: BlockType.CONDITIONAL,
-                        arguments: {
-                            PIN: {
-                                type: ArgumentType.STRING,
-                                menu: 'interruptPins',
-                                defaultValue: Pins.D3
-                            },
-                            MODE: {
-                                type: ArgumentType.STRING,
-                                menu: 'interruptMode',
-                                defaultValue: InterrupMode.Rising
-                            }
-                        },
-                        programMode: [ProgramModeType.UPLOAD]
-                    },
-                    {
-
-                        opcode: 'detachInterrupt',
-                        text: formatMessage({
-                            id: 'arduinoUno.pins.detachInterrupt',
-                            default: 'detach interrupt pin [PIN]',
-                            description: 'arduinoUno detach interrupt'
+                            id: 'arduinoUno.pins.setDigitalOutput',
+                            default: 'set digital pin [PIN] out [LEVEL]',
+                            description: 'arduinoUno set digital pin out'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
                             PIN: {
                                 type: ArgumentType.STRING,
-                                menu: 'interruptPins',
-                                defaultValue: Pins.D3
+                                menu: 'pins',
+                                defaultValue: Pins.D2
+                            },
+                            LEVEL: {
+                                type: ArgumentType.STRING,
+                                menu: 'level',
+                                defaultValue: Level.High
                             }
-                        },
-                        programMode: [ProgramModeType.UPLOAD]
-                    }
+                        }
+                    },
+                    // {
+                    //     opcode: 'setPinMode',
+                    //     text: formatMessage({
+                    //         id: 'arduinoUno.pins.setPinMode',
+                    //         default: 'set pin [PIN] mode [MODE]',
+                    //         description: 'arduinoUno set pin mode'
+                    //     }),
+                    //     blockType: BlockType.COMMAND,
+                    //     arguments: {
+                    //         PIN: {
+                    //             type: ArgumentType.STRING,
+                    //             menu: 'pins',
+                    //             defaultValue: Pins.D0
+                    //         },
+                    //         MODE: {
+                    //             type: ArgumentType.STRING,
+                    //             menu: 'mode',
+                    //             defaultValue: Mode.Input
+                    //         }
+                    //     }
+                    // },
+                    
+                    // '---',
+                    // {
+
+                    //     opcode: 'setServoOutput',
+                    //     text: formatMessage({
+                    //         id: 'arduinoUno.pins.setServoOutput',
+                    //         default: 'set servo pin [PIN] out [OUT]',
+                    //         description: 'arduinoUno set servo pin out'
+                    //     }),
+                    //     blockType: BlockType.COMMAND,
+                    //     arguments: {
+                    //         PIN: {
+                    //             type: ArgumentType.STRING,
+                    //             menu: 'pwmPins',
+                    //             defaultValue: Pins.D3
+                    //         },
+                    //         OUT: {
+                    //             type: ArgumentType.HALF_ANGLE,
+                    //             defaultValue: '90'
+                    //         }
+                    //     }
+                    // },
+                    // '---',
+                    // {
+
+                    //     opcode: 'attachInterrupt',
+                    //     text: formatMessage({
+                    //         id: 'arduinoUno.pins.attachInterrupt',
+                    //         default: 'attach interrupt pin [PIN] mode [MODE] executes',
+                    //         description: 'arduinoUno attach interrupt'
+                    //     }),
+                    //     blockType: BlockType.CONDITIONAL,
+                    //     arguments: {
+                    //         PIN: {
+                    //             type: ArgumentType.STRING,
+                    //             menu: 'interruptPins',
+                    //             defaultValue: Pins.D3
+                    //         },
+                    //         MODE: {
+                    //             type: ArgumentType.STRING,
+                    //             menu: 'interruptMode',
+                    //             defaultValue: InterrupMode.Rising
+                    //         }
+                    //     },
+                    //     programMode: [ProgramModeType.UPLOAD]
+                    // },
+                    // {
+
+                    //     opcode: 'detachInterrupt',
+                    //     text: formatMessage({
+                    //         id: 'arduinoUno.pins.detachInterrupt',
+                    //         default: 'detach interrupt pin [PIN]',
+                    //         description: 'arduinoUno detach interrupt'
+                    //     }),
+                    //     blockType: BlockType.COMMAND,
+                    //     arguments: {
+                    //         PIN: {
+                    //             type: ArgumentType.STRING,
+                    //             menu: 'interruptPins',
+                    //             defaultValue: Pins.D3
+                    //         }
+                    //     },
+                    //     programMode: [ProgramModeType.UPLOAD]
+                    // }
                 ],
                 menus: {
                     pins: {
@@ -714,7 +715,7 @@ class OpenBlockArduinoUnoDevice {
                         arguments: {
                             VALUE: {
                                 type: ArgumentType.STRING,
-                                defaultValue: 'Hello OpenBlock'
+                                defaultValue: 'hello'
                             },
                             EOL: {
                                 type: ArgumentType.STRING,
@@ -756,134 +757,134 @@ class OpenBlockArduinoUnoDevice {
                     }
                 }
             },
-            {
-                id: 'data',
-                name: formatMessage({
-                    id: 'arduinoUno.category.data',
-                    default: 'Data',
-                    description: 'The name of the arduino uno device data category'
-                }),
-                color1: '#CF63CF',
-                color2: '#C94FC9',
-                color3: '#BD42BD',
-                blocks: [
-                    {
-                        opcode: 'dataMap',
-                        text: formatMessage({
-                            id: 'arduinoUno.data.dataMap',
-                            default: 'map [DATA] from ([ARG0], [ARG1]) to ([ARG2], [ARG3])',
-                            description: 'arduinoUno data map'
-                        }),
-                        blockType: BlockType.REPORTER,
-                        arguments: {
-                            DATA: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '50'
-                            },
-                            ARG0: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '1'
-                            },
-                            ARG1: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '100'
-                            },
-                            ARG2: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '1'
-                            },
-                            ARG3: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '1000'
-                            }
-                        },
-                        programMode: [ProgramModeType.UPLOAD]
-                    },
-                    {
-                        opcode: 'dataConstrain',
-                        text: formatMessage({
-                            id: 'arduinoUno.data.dataConstrain',
-                            default: 'constrain [DATA] between ([ARG0], [ARG1])',
-                            description: 'arduinoUno data constrain'
-                        }),
-                        blockType: BlockType.REPORTER,
-                        arguments: {
-                            DATA: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '50'
-                            },
-                            ARG0: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '1'
-                            },
-                            ARG1: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '100'
-                            }
-                        },
-                        programMode: [ProgramModeType.UPLOAD]
-                    },
-                    '---',
-                    {
-                        opcode: 'dataConvert',
-                        text: formatMessage({
-                            id: 'arduinoUno.data.dataConvert',
-                            default: 'convert [DATA] to [TYPE]',
-                            description: 'arduinoUno data convert'
-                        }),
-                        blockType: BlockType.REPORTER,
-                        arguments: {
-                            DATA: {
-                                type: ArgumentType.STRING,
-                                defaultValue: '123'
-                            },
-                            TYPE: {
-                                type: ArgumentType.STRING,
-                                menu: 'dataType',
-                                defaultValue: DataType.Integer
-                            }
-                        },
-                        programMode: [ProgramModeType.UPLOAD]
-                    },
-                    {
-                        opcode: 'dataConvertASCIICharacter',
-                        text: formatMessage({
-                            id: 'arduinoUno.data.dataConvertASCIICharacter',
-                            default: 'convert [DATA] to ASCII character',
-                            description: 'arduinoUno data convert to ASCII character'
-                        }),
-                        blockType: BlockType.REPORTER,
-                        arguments: {
-                            DATA: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '97'
-                            }
-                        },
-                        programMode: [ProgramModeType.UPLOAD]
-                    },
-                    {
-                        opcode: 'dataConvertASCIINumber',
-                        text: formatMessage({
-                            id: 'arduinoUno.data.dataConvertASCIINumber',
-                            default: 'convert [DATA] to ASCII nubmer',
-                            description: 'arduinoUno data convert to ASCII nubmer'
-                        }),
-                        blockType: BlockType.REPORTER,
-                        arguments: {
-                            DATA: {
-                                type: ArgumentType.STRING,
-                                defaultValue: 'a'
-                            }
-                        },
-                        programMode: [ProgramModeType.UPLOAD]
-                    }
-                ],
-                menus: {
-                    dataType: {
-                        items: this.DATA_TYPE_MENU
-                    }
-                }
-            }
+            // {
+            //     id: 'data',
+            //     name: formatMessage({
+            //         id: 'arduinoUno.category.data',
+            //         default: 'Data',
+            //         description: 'The name of the arduino uno device data category'
+            //     }),
+            //     color1: '#CF63CF',
+            //     color2: '#C94FC9',
+            //     color3: '#BD42BD',
+            //     blocks: [
+            //         {
+            //             opcode: 'dataMap',
+            //             text: formatMessage({
+            //                 id: 'arduinoUno.data.dataMap',
+            //                 default: 'map [DATA] from ([ARG0], [ARG1]) to ([ARG2], [ARG3])',
+            //                 description: 'arduinoUno data map'
+            //             }),
+            //             blockType: BlockType.REPORTER,
+            //             arguments: {
+            //                 DATA: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '50'
+            //                 },
+            //                 ARG0: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '1'
+            //                 },
+            //                 ARG1: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '100'
+            //                 },
+            //                 ARG2: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '1'
+            //                 },
+            //                 ARG3: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '1000'
+            //                 }
+            //             },
+            //             programMode: [ProgramModeType.UPLOAD]
+            //         },
+            //         {
+            //             opcode: 'dataConstrain',
+            //             text: formatMessage({
+            //                 id: 'arduinoUno.data.dataConstrain',
+            //                 default: 'constrain [DATA] between ([ARG0], [ARG1])',
+            //                 description: 'arduinoUno data constrain'
+            //             }),
+            //             blockType: BlockType.REPORTER,
+            //             arguments: {
+            //                 DATA: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '50'
+            //                 },
+            //                 ARG0: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '1'
+            //                 },
+            //                 ARG1: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '100'
+            //                 }
+            //             },
+            //             programMode: [ProgramModeType.UPLOAD]
+            //         },
+            //         '---',
+            //         {
+            //             opcode: 'dataConvert',
+            //             text: formatMessage({
+            //                 id: 'arduinoUno.data.dataConvert',
+            //                 default: 'convert [DATA] to [TYPE]',
+            //                 description: 'arduinoUno data convert'
+            //             }),
+            //             blockType: BlockType.REPORTER,
+            //             arguments: {
+            //                 DATA: {
+            //                     type: ArgumentType.STRING,
+            //                     defaultValue: '123'
+            //                 },
+            //                 TYPE: {
+            //                     type: ArgumentType.STRING,
+            //                     menu: 'dataType',
+            //                     defaultValue: DataType.Integer
+            //                 }
+            //             },
+            //             programMode: [ProgramModeType.UPLOAD]
+            //         },
+            //         {
+            //             opcode: 'dataConvertASCIICharacter',
+            //             text: formatMessage({
+            //                 id: 'arduinoUno.data.dataConvertASCIICharacter',
+            //                 default: 'convert [DATA] to ASCII character',
+            //                 description: 'arduinoUno data convert to ASCII character'
+            //             }),
+            //             blockType: BlockType.REPORTER,
+            //             arguments: {
+            //                 DATA: {
+            //                     type: ArgumentType.NUMBER,
+            //                     defaultValue: '97'
+            //                 }
+            //             },
+            //             programMode: [ProgramModeType.UPLOAD]
+            //         },
+            //         {
+            //             opcode: 'dataConvertASCIINumber',
+            //             text: formatMessage({
+            //                 id: 'arduinoUno.data.dataConvertASCIINumber',
+            //                 default: 'convert [DATA] to ASCII nubmer',
+            //                 description: 'arduinoUno data convert to ASCII nubmer'
+            //             }),
+            //             blockType: BlockType.REPORTER,
+            //             arguments: {
+            //                 DATA: {
+            //                     type: ArgumentType.STRING,
+            //                     defaultValue: 'a'
+            //                 }
+            //             },
+            //             programMode: [ProgramModeType.UPLOAD]
+            //         }
+            //     ],
+            //     menus: {
+            //         dataType: {
+            //             items: this.DATA_TYPE_MENU
+            //         }
+            //     }
+            // }
         ];
     }
 
