@@ -36,7 +36,8 @@ const builtinExtensions = {
     diIntelligentData: () => require('../extensions/di_intelligent_data'),
     diTextRecognition: () => require('../extensions/di_text_recognition'),
     diWordProcessing: () => require('../extensions/di_word_processing'),
-    ArduinoNanoUltrasonic: () => require('../extensions/arduinonano/ultrasonic')
+    ArduinoNanoSingleButton: () => require('../extensions/arduinonano/singleButton'),
+    ArduinoNanoLEDButton: () => require('../extensions/arduinonano/LEDButton'),
 };
 
 const builtinDevices = {
