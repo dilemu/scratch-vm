@@ -40,6 +40,9 @@ const builtinExtensions = {
     ArduinoNanoLEDButton: () => require('../extensions/arduinonano/LEDButton'),
     ArduinoNanoPassiveBuzzer: () => require('../extensions/arduinonano/passiveBuzzer'),
     ArduinoNanoFanControl: () => require('../extensions/arduinonano/FanControl'),
+    ArduinoNanoLightSensor: () => require('../extensions/arduinonano/lightSensor'),
+    ArduinoNanoTouch: () => require('../extensions/arduinonano/touch'),
+    ArduinoNanoVoiceSensor: () => require('../extensions/arduinonano/voiceSensor'),
 };
 
 const builtinDevices = {
