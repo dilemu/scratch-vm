@@ -15,24 +15,17 @@ const ArduinoPeripheral = require('../../../devices/common/arduino-peripheral');
 const blockIconURI = '';
 const menuIconURI = blockIconURI;
 
-const Pins = [
-    ["A0-A1", "A0-A1"],
-    ["A2-A3", "A2-A3"],
-    ["A4-A5", "A4-A5"],
-    ["0-1", "0-1"],
-    ["2-3", "2-3"],
+const digitalPins = [
     ["5-6", "5-6"],
-    ["4-7", "4-7"],
-    ["10-11", "10-11"],
-    ["12-13", "12-13"]
+    ["10-11", "10-11"]
 ]
 
-const Switch = {
-    ON: "HIGH",
-    OFF: "LOW"
-}
+const directionList = [
+    ["顺时针", 1],
+    ["逆时针", 2]
+]
 
-class ArduinoNanoLEDButton {
+class ArduinoNanoFanControl {
     constructor(runtime) {
         /**
          * The runtime instantiating this block package.
@@ -48,7 +41,7 @@ class ArduinoNanoLEDButton {
      * @type {string}
      */
     static get STATE_KEY() {
-        return 'Scratch.ArduinoNanoLEDButton';
+        return 'Scratch.ArduinoNanoFanControl';
     }
 
     /**
@@ -65,9 +58,16 @@ class ArduinoNanoLEDButton {
     }
 
     get ANALOG_PINS_MENU() {
-        return Pins.map(pin => ({
+        return digitalPins.map(pin => ({
             text: pin[0],
             value: pin[1]
+        }));
+    }
+
+    get DIRECTION_MENU() {
+        return directionList.map(direction => ({
+            text: direction[0],
+            value: direction[1]
         }));
     }
 
@@ -78,10 +78,10 @@ class ArduinoNanoLEDButton {
      * @private
      */
     _getState(target) {
-        let state = target.getCustomState(ArduinoNanoLEDButton.STATE_KEY);
+        let state = target.getCustomState(ArduinoNanoFanControl.STATE_KEY);
         if (!state) {
-            state = Clone.simple(ArduinoNanoLEDButton.DEFAULT_HELLOWORLD_STATE);
-            target.setCustomState(ArduinoNanoLEDButton.STATE_KEY, state);
+            state = Clone.simple(ArduinoNanoFanControl.DEFAULT_HELLOWORLD_STATE);
+            target.setCustomState(ArduinoNanoFanControl.STATE_KEY, state);
         }
         return state;
     }
@@ -91,26 +91,30 @@ class ArduinoNanoLEDButton {
      */
     getInfo() {
         return {
-            id: 'ArduinoNanoLEDButton',
-            name: "指示灯按钮",
+            id: 'ArduinoNanoFanControl',
+            name: "轴流式风扇",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
             blocks: [
                 {
-                    opcode: 'digitalWrite',
+                    opcode: 'start',
                     blockType: BlockType.COMMAND,
-                    text: '[SWITCH] 引脚 [PIN] LED',
+                    text: '设置 风扇 管脚 [PIN] 的方向为 [DIRECTION] 转速为 [SPEED]',
                     arguments: {
-                        SWITCH: {
-                            type: ArgumentType.STRING,
-                            menu: 'SWITCH_MENU',
-                            defaultValue: Switch.ON
-                        },
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
-                            defaultValue: 'A0-A1'
+                            defaultValue: '5-6'
+                        },
+                        DIRECTION: {
+                            type: ArgumentType.STRING,
+                            menu: 'DIRECTION_MENU',
+                            defaultValue: 1
+                        },
+                        SPEED: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
                         }
                     }
                 }
@@ -119,29 +123,29 @@ class ArduinoNanoLEDButton {
                 ANALOG_PINS_MENU: {
                     items: this.ANALOG_PINS_MENU
                 },
-                SWITCH_MENU: {
-                    items: [
-                        {
-                            text: '开',
-                            value: Switch.ON
-                        },
-                        {
-                            text: '关',
-                            value: Switch.OFF
-                        }
-                    ]
+                DIRECTION_MENU: {
+                    items: this.DIRECTION_MENU
                 }
             }
         };
     }
 
-    digitalWrite(args, util) {
-        const PIN = args.PIN;
-        const SWITCH = args.SWITCH;
-        const [a, b] = PIN.split('-');
-        this._peripheral.setPinMode(b, 'OUTPUT');
-        return this._peripheral.setDigitalOutput(b, SWITCH);
+    start(args) {
+        const pin = args.PIN;
+        const direction = args.DIRECTION;
+        const speed = args.SPEED;
+        this.FanControl(...pin.split('-'), direction, parseInt(speed));
+    }
+
+    FanControl(pinA, pinB, direction, speed) {
+        if(direction == 1) {
+            pinA = 0;
+            this._peripheral.setPwmOutput(pinB, speed);
+        } else if(direction == 2) {
+            pinB = 0;
+            this._peripheral.setPwmOutput(pinA, speed);
+        }
     }
 }
 
-module.exports = ArduinoNanoLEDButton;
+module.exports = ArduinoNanoFanControl;

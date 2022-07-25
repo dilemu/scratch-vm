@@ -38,7 +38,8 @@ const builtinExtensions = {
     diWordProcessing: () => require('../extensions/di_word_processing'),
     ArduinoNanoSingleButton: () => require('../extensions/arduinonano/singleButton'),
     ArduinoNanoLEDButton: () => require('../extensions/arduinonano/LEDButton'),
-    ArduinoNanoPassiveBuzzer: () => require('../extensions/arduinonano/passiveBuzzer')
+    ArduinoNanoPassiveBuzzer: () => require('../extensions/arduinonano/passiveBuzzer'),
+    ArduinoNanoFanControl: () => require('../extensions/arduinonano/FanControl'),
 };
 
 const builtinDevices = {

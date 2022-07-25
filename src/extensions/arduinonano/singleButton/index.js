@@ -117,6 +117,7 @@ class ArduinoNanoSingleButton {
         const PIN = args.PIN;
         const state = this._getState(util.target);
         const [a, b] = PIN.split('-');
+        this._peripheral.setPinMode(a, 'INPUT');
         let mode = 0
         if (a.charAt(0) === 'A') {
             mode = 0;
@@ -125,9 +126,9 @@ class ArduinoNanoSingleButton {
         }
         switch (mode) {
             case 0:
-                return this._peripheral.readAnalogPin(a, b);
+                return this._peripheral.readAnalogPin(a);
             case 1:
-                return this._peripheral.readDigitalPin(a, b);
+                return this._peripheral.readDigitalPin(a);
         }
     }
 }

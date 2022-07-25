@@ -215,7 +215,7 @@ class ArduinoNanoPassiveBuzzer {
         const BEAT = args.BEAT;
         const beatTime = 60.0/120;
         const tone = SOUND[NOTE];
-        this.tone(a, tone, BEAT * 1000 * beatTime);
+        this._tone(a, tone, BEAT * 1000 * beatTime);
     }
 
     play1(args, util) {
@@ -223,10 +223,10 @@ class ArduinoNanoPassiveBuzzer {
         const [a, b] = PIN.split('-');
         const FREQ = args.FREQ;
         const TIME = args.TIME;
-        this.tone(a, FREQ, TIME);
+        this._tone(a, FREQ, TIME);
     }
 
-    async tone(pin, frequency, duration) {
+    async _tone(pin, frequency, duration) {
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         frequency = parseInt(frequency);
         duration = parseInt(duration);
