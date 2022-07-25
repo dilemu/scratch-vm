@@ -16,15 +16,24 @@ const blockIconURI = '';
 const menuIconURI = blockIconURI;
 
 const Pins = [
-    ["A0-A1", "A0-A1"],
-    ["A2-A3", "A2-A3"],
-    ["A4-A5", "A4-A5"],
-    ["0-1", "0-1"],
-    ["2-3", "2-3"],
-    ["5-6", "5-6"],
-    ["4-7", "4-7"],
-    ["10-11", "10-11"],
-    ["12-13", "12-13"]
+    ["A0", "A0"],
+    ["A1", "A1"],
+    ["A2", "A2"],
+    ["A3", "A3"],
+    ["A4", "A4"],
+    ["A5", "A5"],
+    ["0", "0"],
+    ["1", "1"],
+    ["2", "2"],
+    ["3", "3"],
+    ["4", "4"],
+    ["5", "5"],
+    ["6", "6"],
+    ["7", "7"],
+    ["10", "10"],
+    ["11", "11"],
+    ["12", "12"],
+    ["13", "13"]
 ]
 
 const Switch = {
@@ -110,7 +119,7 @@ class ArduinoNanoLEDButton {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
-                            defaultValue: 'A0-A1'
+                            defaultValue: '2'
                         }
                     }
                 }
@@ -138,9 +147,8 @@ class ArduinoNanoLEDButton {
     digitalWrite(args, util) {
         const PIN = args.PIN;
         const SWITCH = args.SWITCH;
-        const [a, b] = PIN.split('-');
-        this._peripheral.setPinMode(b, 'OUTPUT');
-        return this._peripheral.setDigitalOutput(b, SWITCH);
+        this._peripheral.setPinMode(PIN, 'OUTPUT');
+        return this._peripheral.setDigitalOutput(PIN, SWITCH);
     }
 }
 
