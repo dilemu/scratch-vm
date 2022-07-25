@@ -1,10 +1,8 @@
 const ArgumentType = require('../../../extension-support/argument-type');
 const BlockType = require('../../../extension-support/block-type');
-const Cast = require('../../../util/cast');
-const MathUtil = require('../../../util/math-util');
 const Clone = require('../../../util/clone');
-const formatMessage = require('format-message');
-const ArduinoPeripheral = require('../../../devices/common/arduino-peripheral');
+const SOUND = require('./sound').default;
+
 // const MathUtil = require('../../util/math-util');
 
 /**
@@ -210,11 +208,37 @@ class ArduinoNanoPassiveBuzzer {
         };
     }
 
-    digitalWrite(args, util) {
+    play(args, util) {
         const PIN = args.PIN;
-        const SWITCH = args.SWITCH;
         const [a, b] = PIN.split('-');
-        return this._peripheral.setDigitalOutput(b, SWITCH);
+        const NOTE = args.NOTE;
+        const BEAT = args.BEAT;
+        const beatTime = 60.0/120;
+        const tone = SOUND[NOTE];
+        this.tone(a, tone, BEAT * 1000 * beatTime);
+    }
+
+    play1(args, util) {
+        const PIN = args.PIN;
+        const [a, b] = PIN.split('-');
+        const FREQ = args.FREQ;
+        const TIME = args.TIME;
+        this.tone(a, FREQ, TIME);
+    }
+
+    async tone(pin, frequency, duration) {
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        frequency = parseInt(frequency);
+        duration = parseInt(duration);
+        this._peripheral.setPinMode(pin, 'OUTPUT');
+        const period = 1000000 / frequency;
+        const pulse = period / 2;
+        for(let i = 0; i < duration * 1000; i += period) {
+            this._peripheral.setDigitalOutput(pin, 'HIGH');
+            sleep(pulse / 1000);
+            this._peripheral.setDigitalOutput(pin, 'LOW');
+            sleep(pulse / 1000);
+        }
     }
 }
 
