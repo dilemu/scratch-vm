@@ -45,6 +45,7 @@ const builtinExtensions = {
     ArduinoNanoVoiceSensor: () => require('../extensions/arduinonano/voiceSensor'),
     ArduinoNanoMotor: () => require('../extensions/arduinonano/motor'),
     ArduinoFourDigitClockDisplay: () => require('../extensions/arduinonano/fourDigitClockDisplay'),
+    ArduinoNanoDHT: () => require('../extensions/arduinonano/DHT'),
 };
 
 const builtinDevices = {
