@@ -1,6 +1,6 @@
 {
   "name": "delightmom-scratch-vm",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "Virtual Machine for Delightmom",
   "author": "Massachusetts Institute of Technology",
   "license": "BSD-3-Clause",
@@ -20,7 +20,6 @@
     "tap:integration": "",
     "test": "npm run lint && npm run docs && npm run tap",
     "watch": "webpack --progress --colors --watch",
-    "version": "json -f package.json -I -e \"this.repository.sha = '$(git log -n1 --pretty=format:%H)'\"",
     "prepublish": "in-publish && npm run build || not-in-publish"
   },
   "dependencies": {
@@ -62,6 +61,8 @@
     "babel-loader": "8.2.2",
     "callsite": "1.0.0",
     "copy-webpack-plugin": "4.5.4",
+    "delightmom-scratch-blocks": "latest",
+    "delightmom-scratch-l10n": "latest",
     "docdash": "1.2.0",
     "eslint": "5.3.0",
     "eslint-config-scratch": "5.1.0",
@@ -72,8 +73,6 @@
     "jsdoc": "3.6.6",
     "json": "^9.0.4",
     "lodash.defaultsdeep": "4.6.1",
-    "delightmom-scratch-blocks": "latest",
-    "delightmom-scratch-l10n": "latest",
     "pngjs": "3.3.3",
     "scratch-audio": "0.1.0-prerelease.20200528195344",
     "scratch-render": "0.1.0-prerelease.20211028200436",
