@@ -46,6 +46,7 @@ const builtinExtensions = {
     ArduinoNanoMotor: () => require('../extensions/arduinonano/motor'),
     ArduinoFourDigitClockDisplay: () => require('../extensions/arduinonano/fourDigitClockDisplay'),
     ArduinoNanoDHT: () => require('../extensions/arduinonano/DHT'),
+    ArduinoNanoServo: () => require("../extensions/arduinonano/servo"),
 };
 
 const builtinDevices = {

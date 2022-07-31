@@ -16,15 +16,16 @@ const blockIconURI = '';
 const menuIconURI = blockIconURI;
 
 const Pins = [
-    ["A0-A1", "A0-A1"],
-    ["A2-A3", "A2-A3"],
-    ["A4-A5", "A4-A5"],
-    ["0-1", "0-1"],
-    ["2-3", "2-3"],
-    ["5-6", "5-6"],
-    ["4-7", "4-7"],
-    ["10-11", "10-11"],
-    ["12-13", "12-13"]
+    ["A0", "A0"],
+    ["A2", "A2"],
+    ["A4", "A4"],
+    ["A5", "A5"],
+    ["0", "0"],
+    ["2", "2"],
+    ["4", "4"],
+    ["5", "5"],
+    ["10", "10"],
+    ["12", "12"],
 ]
 
 const PNPID_LIST = [
@@ -123,8 +124,8 @@ class ArduinoNanoUltrasonic {
      */
     getInfo() {
         return {
-            id: 'ArduinoNanUltrasonic',
-            name: "超声波传感器",
+            id: 'ArduinoNanoServo',
+            name: "舵机模块（180°）",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
@@ -132,12 +133,16 @@ class ArduinoNanoUltrasonic {
                 {
                     opcode: 'readAnalogPin',
                     blockType: BlockType.BOOLEAN,
-                    text: '读取 超声波传感器 管脚 [PIN] 的测距值(CM)',
+                    text: '设置 [PIN] 引脚伺服舵机为 [ANGLE]度',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
                             defaultValue: 'A0-A1'
+                        },
+                        ANGLE: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 90
                         }
                     }
                 }
@@ -152,35 +157,23 @@ class ArduinoNanoUltrasonic {
 
     async readAnalogPin(args, util) {
         const PIN = args.PIN;
-        const st = Date.now();
-        const micros = () => { return (Date.now() - st) / 1000; }
-        const state = this._getState(util.target);
-        const [a, b] = PIN.split('-');
-        const CM = 28;
-        const delayMicroseconds = ms => {
-            return new Promise(resolve => {
-                setTimeout(resolve, ms/1000);
-            })
+        const parsePin = (pin) => {
+            if (pin.charAt(0) === 'A') {
+                return parseInt(pin.slice(1), 10) + 14;
+            }
+            return parseInt(pin, 10);
         }
-        // init pin
-        this._peripheral.setPinMode(a, 'OUTPUT');
-        this._peripheral.setPinMode(b, 'INPUT');
-        // read
-        const timing = () => {
-            this._peripheral.digitalWrite(a, 0);
-            delayMicroseconds(2);
-            this._peripheral.digitalWrite(a, 1);
-            delayMicroseconds(10);
-            this._peripheral.digitalWrite(a, 0);
-
-            let previousMicros = micros();
-            while (!await this._peripheral.readDigitalPin(echo) && (micros() - previousMicros) <= timeout); // wait for the echo pin HIGH or timeout
-            previousMicros = micros();
-            while (digitalRead(echo) && (micros() - previousMicros) <= timeout); // wait for the echo pin LOW or timeout
-
-            return micros() - previousMicros; // duration
-        }
-        return timing() / CM / 2;
+        let degrees = 10;
+        let incrementer = 10;
+        this._peripheral._firmata.servoConfig(parsePin(PIN), 544, 2400);
+        setInterval(() => {
+            if (degrees >= 180 || degrees === 0) {
+                incrementer *= -1;
+            }
+            degrees += incrementer;
+            this._peripheral._firmata.servoWrite(parsePin(PIN), degrees);
+            console.log(degrees);
+        }, 500);
     }
 }
 
