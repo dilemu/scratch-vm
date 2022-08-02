@@ -87,7 +87,7 @@ class ArduinoNanoTouch {
     getInfo() {
         return {
             id: 'ArduinoNanoTouch',
-            name: "避障传感器",
+            name: "触摸传感器",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
