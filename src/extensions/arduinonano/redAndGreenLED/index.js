@@ -14,26 +14,30 @@ const ArduinoPeripheral = require('../../../devices/common/arduino-peripheral');
 // eslint-disable-next-line max-len
 const blockIconURI = '';
 const menuIconURI = blockIconURI;
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const colour = '#32C850';
 
 const Pins = [
     ["A0-A1", "A0-A1"],
     ["A2-A3", "A2-A3"],
     ["A4-A5", "A4-A5"],
-    ["0-1", "0-1"],
-    ["2-3", "2-3"],
-    ["5-6", "5-6"],
-    ["4-7", "4-7"],
-    ["10-11", "10-11"],
-    ["12-13", "12-13"]
+    ["D0-D1", "0-1"],
+    ["D2-D3", "2-3"],
+    ["D5-D6", "5-6"],
+    ["D4-D7", "4-7"],
+    ["D10-D11", "10-11"],
+    ["D12-D13", "12-13"]
 ]
 
-const typeList = [
-    ["温度值", "TEMPERATURE"],
-    ["湿度值", "HUMIDITY"]
+const lightStatus = [
+    ["亮红灯", "1"],
+    ["灭红灯", "2"],
+    ["亮绿灯", "3"],
+    ["灭绿灯", "4"],
+    ["亮黄灯", "5"],
+    ["灭黄灯", "6"],
 ]
 
-class ArduinoNanoDHT {
+class ArduinoNanRedAndGreenLED {
     constructor(runtime) {
         /**
          * The runtime instantiating this block package.
@@ -49,7 +53,7 @@ class ArduinoNanoDHT {
      * @type {string}
      */
     static get STATE_KEY() {
-        return 'Scratch.ArduinoNanoDHT';
+        return 'Scratch.ArduinoNanRedAndGreenLED';
     }
 
     /**
@@ -72,10 +76,10 @@ class ArduinoNanoDHT {
         }));
     }
 
-    get TYPE_MENU() {
-        return typeList.map(type => ({
-            text: type[0],
-            value: type[1]
+    get LIGHT_STATUS_MENU() {
+        return lightStatus.map(light => ({
+            text: light[0],
+            value: light[1]
         }));
     }
 
@@ -86,10 +90,10 @@ class ArduinoNanoDHT {
      * @private
      */
     _getState(target) {
-        let state = target.getCustomState(ArduinoNanoDHT.STATE_KEY);
+        let state = target.getCustomState(ArduinoNanRedAndGreenLED.STATE_KEY);
         if (!state) {
-            state = Clone.simple(ArduinoNanoDHT.DEFAULT_HELLOWORLD_STATE);
-            target.setCustomState(ArduinoNanoDHT.STATE_KEY, state);
+            state = Clone.simple(ArduinoNanRedAndGreenLED.DEFAULT_HELLOWORLD_STATE);
+            target.setCustomState(ArduinoNanRedAndGreenLED.STATE_KEY, state);
         }
         return state;
     }
@@ -99,26 +103,27 @@ class ArduinoNanoDHT {
      */
     getInfo() {
         return {
-            id: 'ArduinoNanoDHT',
-            name: "温湿度传感器",
+            id: 'ArduinoNanRedAndGreenLED',
+            name: "红绿双色灯",
+            colour: colour,
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
             blocks: [
                 {
-                    opcode: 'digitalRead',
-                    blockType: BlockType.REPORTER,
-                    text: '读取 管脚 [PIN] 的 [TYPE]',
+                    opcode: 'digitalWrite',
+                    blockType: BlockType.COMMAND,
+                    text: '设置 [PIN] 的 红绿双色灯 [STATUS]',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
                             defaultValue: 'A0-A1'
                         },
-                        TYPE: {
+                        STATUS: {
                             type: ArgumentType.STRING,
-                            menu: 'TYPE_MENU',
-                            defaultValue: 'TEMPERATURE'
+                            menu: 'LIGHT_STATUS_MENU',
+                            defaultValue: '1'
                         }
                     }
                 }
@@ -127,58 +132,43 @@ class ArduinoNanoDHT {
                 ANALOG_PINS_MENU: {
                     items: this.ANALOG_PINS_MENU
                 },
-                TYPE_MENU: {
-                    items: this.TYPE_MENU
+                LIGHT_STATUS_MENU: {
+                    items: this.LIGHT_STATUS_MENU
                 }
             }
         };
     }
 
-    async digitalRead(args) {
-        let laststate = 1;
-        const MAXTIMINGS = 85;
+    digitalWrite(args, util) {
         const pinList = args.PIN;
-        const type = args.TYPE;
-        const data = new Array(6);
-        const [a, b] = pinList.split("-");
-        data[0] = data[1] = data[2] = data[3] = data[4] = 0;
-        this._peripheral.setDigitalOutput(a, 'HIGH');
-        await sleep(250);
-        this._peripheral.setPinMode(a, 'OUTPUT');
-        this._peripheral.setDigitalOutput(a, 'LOW');
-        await sleep(20);
-        this._peripheral.setDigitalOutput(a, 'HIGH');
-        await sleep(0.04);
-        this._peripheral.setPinMode(a, 'INPUT');
-        let j = 0;
-        for (let i = 0; i < MAXTIMINGS; i++) {
-            let counter = 0;
-            while (await this._peripheral.readDigitalPin(a) == laststate) {
-                counter++;
-                await sleep(0.01);
-                if (counter === 255) {
-                    break;
-                }
-            }
-            laststate = await this._peripheral.readDigitalPin(a);
-
-            if (counter == 255) break;
-            
-            if(i >=4 && i%2 === 0) {
-                data[j / 8] <<= 1;
-                if(counter > 6) {
-                    data[j/8] |= 1;
-                }
-                j++;
-            }
+        const [a, b] = pinList.split('-');
+        const status = args.STATUS;
+        this._peripheral.setPinMode(a, "OUTPUT");
+        this._peripheral.setPinMode(b, "OUTPUT");
+        switch (parseInt(status)) {
+            case 1:
+                this._peripheral.setDigitalOutput(a, "HIGH");
+                break;
+            case 2:
+                this._peripheral.setDigitalOutput(a, "LOW");
+                break;
+            case 3:
+                this._peripheral.setDigitalOutput(b, "HIGH");
+                break;
+            case 4:
+                this._peripheral.setDigitalOutput(b, "LOW");
+                break;
+            case 5:
+                this._peripheral.setDigitalOutput(a, "HIGH");
+                this._peripheral.setDigitalOutput(b, "HIGH");
+                break;
+            case 6:
+                this._peripheral.setDigitalOutput(a, "LOW");
+                this._peripheral.setDigitalOutput(b, "LOW");
+                break;
         }
-        if ((j >= 40) &&
-            (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) {
-            return data[2];
-        }
-        return false;
-        return this._peripheral.readDigitalPin(a);
+        return;
     }
 }
 
-module.exports = ArduinoNanoDHT;
+module.exports = ArduinoNanRedAndGreenLED;

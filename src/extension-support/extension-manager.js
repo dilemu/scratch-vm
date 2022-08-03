@@ -47,6 +47,7 @@ const builtinExtensions = {
     ArduinoFourDigitClockDisplay: () => require('../extensions/arduinonano/fourDigitClockDisplay'),
     ArduinoNanoDHT: () => require('../extensions/arduinonano/DHT'),
     ArduinoNanoServo: () => require("../extensions/arduinonano/servo"),
+    ArduinoNanRedAndGreenLED: () => require("../extensions/arduinonano/redAndGreenLED"),
 };
 
 const builtinDevices = {

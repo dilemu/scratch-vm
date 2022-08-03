@@ -16,24 +16,15 @@ const blockIconURI = '';
 const menuIconURI = blockIconURI;
 
 const Pins = [
-    ["A0", "A0"],
-    ["A1", "A1"],
-    ["A2", "A2"],
-    ["A3", "A3"],
-    ["A4", "A4"],
-    ["A5", "A5"],
-    ["0", "0"],
-    ["1", "1"],
-    ["2", "2"],
-    ["3", "3"],
-    ["4", "4"],
-    ["5", "5"],
-    ["6", "6"],
-    ["7", "7"],
-    ["10", "10"],
-    ["11", "11"],
-    ["12", "12"],
-    ["13", "13"]
+    ["A0-A1", "A0-A1"],
+    ["A2-A3", "A2-A3"],
+    ["A4-A5", "A4-A5"],
+    ["D0-D1", "0-1"],
+    ["D2-D3", "2-3"],
+    ["D5-D6", "5-6"],
+    ["D4-D7", "4-7"],
+    ["D10-D11", "10-11"],
+    ["D12-D13", "12-13"]
 ]
 
 const Switch = {
@@ -109,7 +100,7 @@ class ArduinoNanoLEDButton {
                 {
                     opcode: 'digitalWrite',
                     blockType: BlockType.COMMAND,
-                    text: '[SWITCH] 引脚 [PIN] LED',
+                    text: '[SWITCH] [PIN] 的LED',
                     arguments: {
                         SWITCH: {
                             type: ArgumentType.STRING,
@@ -119,7 +110,19 @@ class ArduinoNanoLEDButton {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
-                            defaultValue: '2'
+                            defaultValue: 'A0-A1'
+                        }
+                    }
+                },
+                {
+                    opcode: 'readAnalogPin',
+                    blockType: BlockType.BOOLEAN,
+                    text: '引脚 [PIN] 按钮被按下？',
+                    arguments: {
+                        PIN: {
+                            type: ArgumentType.STRING,
+                            menu: 'ANALOG_PINS_MENU',
+                            defaultValue: 'A0-A1'
                         }
                     }
                 }
@@ -145,10 +148,42 @@ class ArduinoNanoLEDButton {
     }
 
     digitalWrite(args, util) {
-        const PIN = args.PIN;
+        const pinList = args.PIN;
+        const [a, b] = pinList.split('-');
         const SWITCH = args.SWITCH;
-        this._peripheral.setPinMode(PIN, 'OUTPUT');
-        return this._peripheral.setDigitalOutput(PIN, SWITCH);
+        this._peripheral.setPinMode(b, 'OUTPUT');
+        let mode = 0
+        if (a.charAt(0) === 'A') {
+            mode = 0;
+        } else {
+            mode = 1;
+        }
+        switch (mode) {
+            case 0:
+                return this._peripheral.setDigitalOutput(b, SWITCH);
+                break;
+            case 1:
+                return this._peripheral.setDigitalOutput(b, SWITCH);
+                break;
+        }
+    }
+
+    readAnalogPin(args, util) {
+        const pinList = args.PIN;
+        const [a, b] = pinList.split('-');
+        this._peripheral.setPinMode(a, 'INPUT');
+        let mode = 0
+        if (a.charAt(0) === 'A') {
+            mode = 0;
+        } else {
+            mode = 1;
+        }
+        switch (mode) {
+            case 0:
+                return this._peripheral.readAnalogPin(a);
+            case 1:
+                return this._peripheral.readDigitalPin(a);
+        }
     }
 }
 
