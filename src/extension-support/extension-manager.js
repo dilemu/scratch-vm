@@ -349,6 +349,7 @@ class ExtensionManager {
                 .then(extensions => {
                     extensions = extensions.map(extension => {
                         extension.iconURL = localResourcesServerUrl + extension.iconURL;
+                        extension.insetIconURL = extension.insetIconURL ? localResourcesServerUrl + extension.insetIconURL : '';
                         if (this.isDeviceExtensionLoaded(extension.extensionId)) {
                             extension.isLoaded = true;
                         }
