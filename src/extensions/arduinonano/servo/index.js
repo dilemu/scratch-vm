@@ -126,6 +126,7 @@ class ArduinoNanoUltrasonic {
         return {
             id: 'ArduinoNanoServo',
             name: "舵机模块（180°）",
+            colour1: '#00AAFF',
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

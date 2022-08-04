@@ -147,6 +147,7 @@ class ArduinoNanoPassiveBuzzer {
         return {
             id: 'ArduinoNanoPassiveBuzzer',
             name: "无源蜂鸣器",
+            colour1: "#00AAFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

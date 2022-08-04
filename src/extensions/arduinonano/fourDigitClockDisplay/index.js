@@ -99,6 +99,7 @@ class ArduinoFourDigitClockDisplay {
         return {
             id: 'ArduinoFourDigitClockDisplay',
             name: "四位数码管",
+            colour1: '#32C850',
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

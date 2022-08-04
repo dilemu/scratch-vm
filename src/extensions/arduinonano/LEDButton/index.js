@@ -93,6 +93,7 @@ class ArduinoNanoLEDButton {
         return {
             id: 'ArduinoNanoLEDButton',
             name: "指示灯按钮",
+            colour1: "#A66EFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

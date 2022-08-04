@@ -88,6 +88,7 @@ class ArduinoNanoVoiceSensor {
         return {
             id: 'ArduinoNanoVoiceSensor',
             name: "声音传感器",
+            colour1: "#A66EFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

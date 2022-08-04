@@ -88,6 +88,7 @@ class ArduinoNanoTouch {
         return {
             id: 'ArduinoNanoTouch',
             name: "触摸传感器",
+            colour1: "#A66EFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

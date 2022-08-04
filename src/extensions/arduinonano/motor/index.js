@@ -93,6 +93,7 @@ class ArduinoNanoMotor {
         return {
             id: 'ArduinoNanoMotor',
             name: "电机驱动模块",
+            colour1: "#00AAFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

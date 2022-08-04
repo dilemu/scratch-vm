@@ -125,6 +125,7 @@ class ArduinoNanoUltrasonic {
         return {
             id: 'ArduinoNanUltrasonic',
             name: "超声波传感器",
+            colour1: "#A66EFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

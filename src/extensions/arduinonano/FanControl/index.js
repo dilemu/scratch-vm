@@ -93,6 +93,7 @@ class ArduinoNanoFanControl {
         return {
             id: 'ArduinoNanoFanControl',
             name: "轴流式风扇",
+            colour1: "#00AAFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

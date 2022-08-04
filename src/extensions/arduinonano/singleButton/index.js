@@ -88,6 +88,7 @@ class ArduinoNanoSingleButton {
         return {
             id: 'ArduinoNanoSingleButton',
             name: "单按钮模块",
+            colour1: "#A66EFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

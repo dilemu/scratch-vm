@@ -101,6 +101,7 @@ class ArduinoNanoDHT {
         return {
             id: 'ArduinoNanoDHT',
             name: "温湿度传感器",
+            color1: '#A66EFF',
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

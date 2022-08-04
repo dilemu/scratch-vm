@@ -88,6 +88,7 @@ class ArduinoNanoLightSensor {
         return {
             id: 'ArduinoNanoLightSensor',
             name: "光敏传感器",
+            colour1: '#A66EFF',
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
