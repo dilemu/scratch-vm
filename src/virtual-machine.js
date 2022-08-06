@@ -582,8 +582,33 @@ class VirtualMachine extends EventEmitter {
             }
             return Promise.reject('Unable to verify Scratch Project version.');
         };
-        return deserializePromise().then(({ targets }) =>
-            this.installTargets(
+        // return deserializePromise().then(({ targets }) =>
+        //     this.installTargets(
+        //         targets,
+        //         projectJSON.extensions,
+        //         true,
+        //         projectJSON.device,
+        //         projectJSON.deviceType,
+        //         projectJSON.pnpIdList,
+        //         projectJSON.programMode,
+        //         projectJSON.deviceExtensions,
+        //         projectJSON
+        //     )
+        // );
+        return deserializePromise()
+            // Step1: Install device first.
+            .then(({targets}) => {
+                if (typeof performance !== 'undefined') {
+                    performance.mark('scratch-vm-deserialize-end');
+                    performance.measure('scratch-vm-deserialize',
+                        'scratch-vm-deserialize-start', 'scratch-vm-deserialize-end');
+                }
+                return this.installDevice(targets, projectJSON.device, projectJSON.deviceType,
+                    projectJSON.pnpIdList, projectJSON.programMode, projectJSON.deviceExtensions);
+            })
+            // Step2: Install target and if there has deivce setting, set the editing target to stage incase there is
+            // device extensions block in sprite workspace, it will cause error.
+            .then(targets => this.installTargets(
                 targets,
                 projectJSON.extensions,
                 true,
@@ -593,25 +618,10 @@ class VirtualMachine extends EventEmitter {
                 projectJSON.programMode,
                 projectJSON.deviceExtensions,
                 projectJSON
-            )
-        );
-        // return deserializePromise()
-        //     // Step1: Install device first.
-        //     .then(({targets}) => {
-        //         if (typeof performance !== 'undefined') {
-        //             performance.mark('scratch-vm-deserialize-end');
-        //             performance.measure('scratch-vm-deserialize',
-        //                 'scratch-vm-deserialize-start', 'scratch-vm-deserialize-end');
-        //         }
-        //         return this.installDevice(targets, projectJSON.device, projectJSON.deviceType,
-        //             projectJSON.pnpIdList, projectJSON.programMode, projectJSON.deviceExtensions);
-        //     })
-        //     // Step2: Install target and if there has deivce setting, set the editing target to stage incase there is
-        //     // device extensions block in sprite workspace, it will cause error.
-        //     .then(targets => this.installTargets(targets, projectJSON.extensions, true, !!projectJSON.device))
-        //     // Step3: Install device extension. it can get flyout blocks because the toolbox has been updated in the
-        //     // previous step. After loaded set the editing target to firset sprite if it has one.
-        //     .then(targets => this.installDeviceExtensions(projectJSON.deviceExtensions, targets));
+            ))
+            // Step3: Install device extension. it can get flyout blocks because the toolbox has been updated in the
+            // previous step. After loaded set the editing target to firset sprite if it has one.
+            .then(targets => this.installDeviceExtensions(projectJSON.deviceExtensions, targets));
     }
 
     /**
