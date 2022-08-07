@@ -48,6 +48,7 @@ const builtinExtensions = {
     ArduinoNanoDHT: () => require('../extensions/arduinonano/DHT'),
     ArduinoNanoServo: () => require("../extensions/arduinonano/servo"),
     ArduinoNanRedAndGreenLED: () => require("../extensions/arduinonano/redAndGreenLED"),
+    ArduinoNanoLED: () => require("../extensions/arduinonano/LED"),
 };
 
 const builtinDevices = {
@@ -239,6 +240,20 @@ class ExtensionManager {
             this.pendingExtensions.push({extensionURL, resolve, reject});
             dispatch.addWorker(new ExtensionWorker());
         });
+    }
+
+    removeExtension(extensionURL) {
+        if (builtinExtensions.hasOwnProperty(extensionURL)) {
+            if (!this.isExtensionLoaded(extensionURL)) {
+                const message = `Rejecting attempt to unload a second extension with ID ${extensionURL}`;
+                log.warn(message);
+            }
+        }
+
+        this._loadedExtensions.delete(extensionURL);
+        this.runtime.removeExtension(extensionURL);
+        this.unregisterExtensionService(extensionURL);
+        this.runtime.emit(this.runtime.constructor.DEVICE_EXTENSION_REMOVED, extensionURL);
     }
 
     /**
@@ -499,6 +514,10 @@ class ExtensionManager {
         dispatch.call(serviceName, 'getInfo').then(info => {
             this._registerExtensionInfo(serviceName, info);
         });
+    }
+
+    unregisterExtensionService(extensionId) {
+        dispatch.call('runtime', '_unregisterExtensionPrimitives', extensionId);
     }
 
     /**

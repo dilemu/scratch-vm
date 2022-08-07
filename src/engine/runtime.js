@@ -1107,6 +1107,10 @@ class Runtime extends EventEmitter {
         this.emit(Runtime.EXTENSION_ADDED, categoryInfo);
     }
 
+    _unregisterExtensionPrimitives (extensionId) {
+        this._blockInfo.splice(this._blockInfo.findIndex(categoryInfo => categoryInfo.id === extensionId), 1);
+    }
+
     /**
      * Register the primitives provided by an device.
      * @param {Array.<object>} deviceInfos - information array about the device (id, blocks, etc.)
@@ -2694,6 +2698,10 @@ class Runtime extends EventEmitter {
      */
     addExtension (id) {
         this._loadedExtensions.push(id);
+    }
+
+    removeExtension (id) {
+        this._loadedExtensions.splice(this._loadedExtensions.indexOf(id), 1);
     }
 
     /**

@@ -43,6 +43,15 @@ class ExtensionWorker {
         }
         return promise;
     }
+
+    dispose(extensionObject) {
+        const index = this.extensions.indexOf(extensionObject);
+        if (index !== -1) {
+            this.extensions.splice(index, 1);
+        }
+        const serviceName = `extension.${this.workerId}.${extensionId}`;
+        return dispatch.call('extensions', 'unregisterExtensionService', serviceName);
+    }
 }
 
 global.Scratch = global.Scratch || {};
