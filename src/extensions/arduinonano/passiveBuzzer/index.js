@@ -80,6 +80,9 @@ class ArduinoNanoPassiveBuzzer {
          */
         this.runtime = runtime;
         this._peripheral = this.runtime.peripheralExtensions.arduinoNano;
+        // if (this.runtime) {
+        //     this.runtime.on("PROJECT_STOP_ALL", this._stopAllSpeech);
+        // }
     }
 
 
@@ -216,7 +219,7 @@ class ArduinoNanoPassiveBuzzer {
         const BEAT = args.BEAT;
         const beatTime = 60.0/120;
         const tone = SOUND[NOTE];
-        this._tone(a, tone, BEAT * 1000 * beatTime);
+        return this._tone(a, tone, BEAT * 1000 * beatTime);
     }
 
     play1(args, util) {
@@ -224,7 +227,7 @@ class ArduinoNanoPassiveBuzzer {
         const [a, b] = PIN.split('-');
         const FREQ = args.FREQ;
         const TIME = args.TIME;
-        this._tone(a, FREQ, TIME);
+        return this._tone(a, FREQ, TIME);
     }
 
     async _tone(pin, frequency, duration) {
@@ -232,14 +235,15 @@ class ArduinoNanoPassiveBuzzer {
         frequency = parseInt(frequency);
         duration = parseInt(duration);
         this._peripheral.setPinMode(pin, 'OUTPUT');
-        const period = 1000000 / frequency;
-        const pulse = period / 2;
-        for(let i = 0; i < duration * 1000; i += period) {
+        const period = 1000000.0 / frequency;
+        const pulse = period / 2.0
+        for (let i = 1; i <= ((duration * 1000) / period); i ++) {
             this._peripheral.setDigitalOutput(pin, 'HIGH');
-            sleep(pulse / 1000);
+            await sleep(pulse / 1000);
             this._peripheral.setDigitalOutput(pin, 'LOW');
-            sleep(pulse / 1000);
+            await sleep(pulse / 1000);
         }
+        return;
     }
 }
 
