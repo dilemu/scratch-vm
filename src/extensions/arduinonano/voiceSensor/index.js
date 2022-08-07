@@ -96,6 +96,7 @@ class ArduinoNanoVoiceSensor {
                 {
                     opcode: 'readAnalogPin',
                     blockType: BlockType.REPORTER,
+                    checkboxInFlyout: false,
                     text: '读取引脚 [PIN] 声音强度',
                     arguments: {
                         PIN: {

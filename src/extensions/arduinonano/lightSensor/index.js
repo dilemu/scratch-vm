@@ -96,6 +96,7 @@ class ArduinoNanoLightSensor {
                 {
                     opcode: 'readAnalogPin',
                     blockType: BlockType.REPORTER,
+                    checkboxInFlyout: false,
                     text: '读取引脚 [PIN] 环境光',
                     arguments: {
                         PIN: {

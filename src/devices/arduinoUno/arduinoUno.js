@@ -513,6 +513,7 @@ class OpenBlockArduinoUnoDevice {
                             description: 'arduinoUno read analog pin'
                         }),
                         blockType: BlockType.REPORTER,
+                        checkboxInFlyout: false,
                         arguments: {
                             PIN: {
                                 type: ArgumentType.STRING,
@@ -734,6 +735,7 @@ class OpenBlockArduinoUnoDevice {
                             description: 'arduinoUno serial available data length'
                         }),
                         blockType: BlockType.REPORTER,
+                        checkboxInFlyout: false,
                         disableMonitor: true,
                         programMode: [ProgramModeType.UPLOAD]
                     },
@@ -745,6 +747,7 @@ class OpenBlockArduinoUnoDevice {
                             description: 'arduinoUno serial read data'
                         }),
                         blockType: BlockType.REPORTER,
+                        checkboxInFlyout: false,
                         disableMonitor: true,
                         programMode: [ProgramModeType.UPLOAD]
                     }

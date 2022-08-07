@@ -109,6 +109,7 @@ class ArduinoNanoDHT {
                 {
                     opcode: 'digitalRead',
                     blockType: BlockType.REPORTER,
+                    checkboxInFlyout: false,
                     text: '读取 管脚 [PIN] 的 [TYPE]',
                     arguments: {
                         PIN: {
