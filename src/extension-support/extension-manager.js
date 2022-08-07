@@ -254,6 +254,7 @@ class ExtensionManager {
                         dev.iconURL = localResourcesServerUrl + dev.iconURL;
                         dev.connectionIconURL = localResourcesServerUrl + dev.connectionIconURL;
                         dev.connectionSmallIconURL = localResourcesServerUrl + dev.connectionSmallIconURL;
+                        dev.isLoaded = this.isDeviceLoaded(dev.deviceId)
                         return dev;
                     });
                     return resolve(devices);
@@ -350,6 +351,7 @@ class ExtensionManager {
                     extensions = extensions.map(extension => {
                         extension.iconURL = localResourcesServerUrl + extension.iconURL;
                         extension.insetIconURL = extension.insetIconURL ? localResourcesServerUrl + extension.insetIconURL : '';
+                        extension.isUnloadble = true;
                         if (this.isDeviceExtensionLoaded(extension.extensionId)) {
                             extension.isLoaded = true;
                         }
