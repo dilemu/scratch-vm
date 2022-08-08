@@ -65,7 +65,7 @@ class ArduinoUno extends ArduinoPeripheral {
     }
 }
 
-class ArduinoNanoUltrasonic {
+class ArduinoNanoServo {
     constructor(runtime) {
         /**
          * The runtime instantiating this block package.
@@ -81,7 +81,7 @@ class ArduinoNanoUltrasonic {
      * @type {string}
      */
     static get STATE_KEY() {
-        return 'Scratch.ArduinoNanoUltrasonic';
+        return 'Scratch.ArduinoNanoServo';
     }
 
     /**
@@ -111,10 +111,10 @@ class ArduinoNanoUltrasonic {
      * @private
      */
     _getState(target) {
-        let state = target.getCustomState(ArduinoNanoUltrasonic.STATE_KEY);
+        let state = target.getCustomState(ArduinoNanoServo.STATE_KEY);
         if (!state) {
-            state = Clone.simple(ArduinoNanoUltrasonic.DEFAULT_HELLOWORLD_STATE);
-            target.setCustomState(ArduinoNanoUltrasonic.STATE_KEY, state);
+            state = Clone.simple(ArduinoNanoServo.DEFAULT_HELLOWORLD_STATE);
+            target.setCustomState(ArduinoNanoServo.STATE_KEY, state);
         }
         return state;
     }
@@ -133,7 +133,7 @@ class ArduinoNanoUltrasonic {
             blocks: [
                 {
                     opcode: 'readAnalogPin',
-                    blockType: BlockType.BOOLEAN,
+                    blockType: BlockType.COMMAND,
                     text: '设置 [PIN] 引脚伺服舵机为 [ANGLE]度',
                     arguments: {
                         PIN: {
@@ -179,4 +179,4 @@ class ArduinoNanoUltrasonic {
 }
 
 
-module.exports = ArduinoNanoUltrasonic;
+module.exports = ArduinoNanoServo;

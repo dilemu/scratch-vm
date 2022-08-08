@@ -21,8 +21,8 @@ const digitalPins = [
 ]
 
 const directionList = [
-    ["正转", 1],
-    ["反转", 2]
+    ["正转", "1"],
+    ["反转", "2"]
 ]
 
 class ArduinoNanoMotor {
