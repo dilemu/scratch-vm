@@ -92,7 +92,7 @@ class ArduinoNanoLED {
     getInfo() {
         return {
             id: 'ArduinoNanoLED',
-            name: "指示灯按钮",
+            name: "纯白单色灯",
             colour1: "#A66EFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
@@ -140,7 +140,7 @@ class ArduinoNanoLED {
         const pinList = args.PIN;
         const [a, b] = pinList.split('-');
         const SWITCH = args.SWITCH;
-        this._peripheral.setPinMode(b, 'OUTPUT');
+        this._peripheral.setPinMode(a, 'OUTPUT');
         let mode = 0
         if (a.charAt(0) === 'A') {
             mode = 0;
@@ -149,10 +149,10 @@ class ArduinoNanoLED {
         }
         switch (mode) {
             case 0:
-                return this._peripheral.setDigitalOutput(b, SWITCH);
+                return this._peripheral.setDigitalOutput(a, SWITCH);
                 break;
             case 1:
-                return this._peripheral.setDigitalOutput(b, SWITCH);
+                return this._peripheral.setDigitalOutput(a, SWITCH);
                 break;
         }
     }
