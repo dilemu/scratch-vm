@@ -17,12 +17,12 @@ const Pins = [
     ["A0-A1", "A0-A1"],
     ["A2-A3", "A2-A3"],
     ["A4-A5", "A4-A5"],
-    ["0-1", "0-1"],
-    ["2-3", "2-3"],
-    ["5-6", "5-6"],
-    ["4-7", "4-7"],
-    ["10-11", "10-11"],
-    ["12-13", "12-13"]
+    ["D0-D1", "0-1"],
+    ["D2-D3", "D2-D3"],
+    ["D5-D6", "D5-D6"],
+    ["D4-D7", "D4-D7"],
+    ["D10-D11", "D10-D11"],
+    ["D12-D13", "D12-D13"]
 ]
 
 const note = [
@@ -150,7 +150,8 @@ class ArduinoNanoPassiveBuzzer {
         return {
             id: 'ArduinoNanoPassiveBuzzer',
             name: "无源蜂鸣器",
-            colour1: "#00AAFF",
+            color1: "#00AAFF",
+            color2: "#00AAFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

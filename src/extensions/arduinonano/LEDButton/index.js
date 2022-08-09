@@ -20,11 +20,11 @@ const Pins = [
     ["A2-A3", "A2-A3"],
     ["A4-A5", "A4-A5"],
     ["D0-D1", "0-1"],
-    ["D2-D3", "2-3"],
-    ["D5-D6", "5-6"],
-    ["D4-D7", "4-7"],
-    ["D10-D11", "10-11"],
-    ["D12-D13", "12-13"]
+    ["D2-D3", "D2-D3"],
+    ["D5-D6", "D5-D6"],
+    ["D4-D7", "D4-D7"],
+    ["D10-D11", "D10-D11"],
+    ["D12-D13", "D12-D13"]
 ]
 
 const Switch = {
@@ -93,7 +93,8 @@ class ArduinoNanoLEDButton {
         return {
             id: 'ArduinoNanoLEDButton',
             name: "指示灯按钮",
-            colour1: "#A66EFF",
+            color1: '#A66EFF',
+            color2: '#A66EFF',
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
@@ -101,7 +102,7 @@ class ArduinoNanoLEDButton {
                 {
                     opcode: 'digitalWrite',
                     blockType: BlockType.COMMAND,
-                    text: '[SWITCH] [PIN] 的LED',
+                    text: '[SWITCH] [PIN] 的按钮指示灯',
                     arguments: {
                         SWITCH: {
                             type: ArgumentType.STRING,
@@ -118,7 +119,7 @@ class ArduinoNanoLEDButton {
                 {
                     opcode: 'readAnalogPin',
                     blockType: BlockType.BOOLEAN,
-                    text: '引脚 [PIN] 按钮被按下？',
+                    text: '按键 [PIN] 检测到被按下？',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,

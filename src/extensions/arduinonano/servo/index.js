@@ -126,7 +126,8 @@ class ArduinoNanoServo {
         return {
             id: 'ArduinoNanoServo',
             name: "舵机模块（180°）",
-            colour1: '#00AAFF',
+            color1: '#00AAFF',
+            color2: '#00AAFF',
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

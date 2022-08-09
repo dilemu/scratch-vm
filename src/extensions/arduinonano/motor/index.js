@@ -16,8 +16,8 @@ const blockIconURI = '';
 const menuIconURI = blockIconURI;
 
 const digitalPins = [
-    ["5-6", "5-6"],
-    ["10-11", "10-11"]
+    ["D5-D6", "D5-D6"],
+    ["D10-D11", "D10-D11"]
 ]
 
 const directionList = [
@@ -93,7 +93,8 @@ class ArduinoNanoMotor {
         return {
             id: 'ArduinoNanoMotor',
             name: "电机驱动模块",
-            colour1: "#00AAFF",
+            color1: "#00AAFF",
+            color2: "#00AAFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,

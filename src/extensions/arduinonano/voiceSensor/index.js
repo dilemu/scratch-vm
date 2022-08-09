@@ -19,12 +19,12 @@ const Pins = [
     ["A0-A1", "A0-A1"],
     ["A2-A3", "A2-A3"],
     ["A4-A5", "A4-A5"],
-    ["0-1", "0-1"],
-    ["2-3", "2-3"],
-    ["5-6", "5-6"],
-    ["4-7", "4-7"],
-    ["10-11", "10-11"],
-    ["12-13", "12-13"]
+    ["D0-D1", "0-1"],
+    ["D2-D3", "D2-D3"],
+    ["D5-D6", "D5-D6"],
+    ["D4-D7", "D4-D7"],
+    ["D10-D11", "D10-D11"],
+    ["D12-D13", "D12-D13"]
 ]
 
 class ArduinoNanoVoiceSensor {
@@ -88,7 +88,8 @@ class ArduinoNanoVoiceSensor {
         return {
             id: 'ArduinoNanoVoiceSensor',
             name: "声音传感器",
-            colour1: "#A66EFF",
+            color1: "#A66EFF",
+            color2: "#A66EFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
@@ -97,7 +98,7 @@ class ArduinoNanoVoiceSensor {
                     opcode: 'readAnalogPin',
                     blockType: BlockType.REPORTER,
                     checkboxInFlyout: false,
-                    text: '读取引脚 [PIN] 声音强度',
+                    text: '读取 [PIN] 的声音强度',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,

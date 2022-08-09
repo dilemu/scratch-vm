@@ -19,12 +19,12 @@ const Pins = [
     ["A0-A1", "A0-A1"],
     ["A2-A3", "A2-A3"],
     ["A4-A5", "A4-A5"],
-    ["0-1", "0-1"],
-    ["2-3", "2-3"],
-    ["5-6", "5-6"],
-    ["4-7", "4-7"],
-    ["10-11", "10-11"],
-    ["12-13", "12-13"]
+    ["D0-D1", "0-1"],
+    ["D2-D3", "D2-D3"],
+    ["D5-D6", "D5-D6"],
+    ["D4-D7", "D4-D7"],
+    ["D10-D11", "D10-D11"],
+    ["D12-D13", "D12-D13"]
 ]
 
 class ArduinoNanoTouch {
@@ -88,7 +88,8 @@ class ArduinoNanoTouch {
         return {
             id: 'ArduinoNanoTouch',
             name: "触摸传感器",
-            colour1: "#A66EFF",
+            color1: "#A66EFF",
+            color2: "#A66EFF",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
@@ -96,7 +97,7 @@ class ArduinoNanoTouch {
                 {
                     opcode: 'readAnalogPin',
                     blockType: BlockType.BOOLEAN,
-                    text: '引脚 [PIN] 检测到触摸？',
+                    text: '触摸传感器 [PIN] 检测到被触摸？',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
