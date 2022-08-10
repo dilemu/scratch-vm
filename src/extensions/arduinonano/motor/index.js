@@ -92,7 +92,7 @@ class ArduinoNanoMotor {
     getInfo() {
         return {
             id: 'ArduinoNanoMotor',
-            name: "电机驱动模块",
+            name: "乐高兼容电机",
             color1: "#00AAFF",
             color2: "#00AAFF",
             // menuIconURI: menuIconURI,
@@ -102,7 +102,7 @@ class ArduinoNanoMotor {
                 {
                     opcode: 'start',
                     blockType: BlockType.COMMAND,
-                    text: '电机 [PIN] 以 [SPEED] 速度 [DIRECTION]',
+                    text: '设置 [PIN] 的 电机 [DIRECTION] 转速 [SPEED]',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
@@ -115,7 +115,7 @@ class ArduinoNanoMotor {
                             defaultValue: 1
                         },
                         SPEED: {
-                            type: ArgumentType.NUMBER,
+                            type: ArgumentType.UINT8_NUMBER,
                             defaultValue: 100
                         }
                     }

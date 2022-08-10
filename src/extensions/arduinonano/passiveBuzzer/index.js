@@ -66,11 +66,12 @@ const note = [
 ];
 
 const beatTime = [
-    ['一拍', '1'],
-    ['二分之一', '0.5'],
-    ['四分之一', '0.25'],
-    ['八分之一', '0.125'],
-    ['十六分之一', '0.0625'],
+    ['1/2拍', '0.5'],
+    ['1/4拍', '0.25'],
+    ['1/8拍', '0.125'],
+    ['1拍', '1'],
+    ['2拍', '2'],
+    ['休止', '0'],
 ];
 
 class ArduinoNanoPassiveBuzzer {
@@ -160,7 +161,7 @@ class ArduinoNanoPassiveBuzzer {
                 {
                     opcode: 'play',
                     blockType: BlockType.COMMAND,
-                    text: '播放管脚 [PIN] 蜂鸣器 音调为 [NOTE] 节拍为 [BEAT]',
+                    text: '播放 [PIN] 的 蜂鸣器 音调 [NOTE] 节拍 [BEAT]',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
@@ -175,14 +176,14 @@ class ArduinoNanoPassiveBuzzer {
                         BEAT: {
                             type: ArgumentType.STRING,
                             menu: 'BEAT_TIME_MENU',
-                            defaultValue: '0.125'
+                            defaultValue: '0.5'
                         }
                     }
                 },
                 {
                     opcode: 'play1',
                     blockType: BlockType.COMMAND,
-                    text: '播放管脚 [PIN] 蜂鸣器 频率为 [FREQ] 时间为 [TIME] ms',
+                    text: '播放 [PIN] 的 蜂鸣器 频率 [FREQ] 时长 [TIME] ms',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,

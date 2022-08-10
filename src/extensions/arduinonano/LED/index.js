@@ -94,8 +94,8 @@ class ArduinoNanoLED {
         return {
             id: 'ArduinoNanoLED',
             name: "纯白单色灯",
-            color1: "#A66EFF",
-            color2: "#A66EFF",
+            color1: "#32C850",
+            color2: "#32C850",
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
@@ -103,7 +103,7 @@ class ArduinoNanoLED {
                 {
                     opcode: 'digitalWrite',
                     blockType: BlockType.COMMAND,
-                    text: '[SWITCH] [PIN] 的LED',
+                    text: '[SWITCH] [PIN] 的纯白单色灯',
                     arguments: {
                         SWITCH: {
                             type: ArgumentType.STRING,

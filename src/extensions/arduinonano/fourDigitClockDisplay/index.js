@@ -99,7 +99,7 @@ class ArduinoFourDigitClockDisplay {
     getInfo() {
         return {
             id: 'ArduinoFourDigitClockDisplay',
-            name: "四位数码管",
+            name: "四位时钟数码管",
             color1: '#32C850',
             color2: '#32C850',
             // menuIconURI: menuIconURI,
@@ -109,16 +109,16 @@ class ArduinoFourDigitClockDisplay {
                 {
                     opcode: 'displayString',
                     blockType: BlockType.COMMAND,
-                    text: '设置 数码管 管脚 [PIN] 显示 [TEXT]',
+                    text: '设置 [PIN] 的数码管 显示 [TEXT]',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
-                            defaultValue: '5-6'
+                            defaultValue: 'A0-A1'
                         },
                         TEXT: {
                             type: ArgumentType.STRING,
-                            defaultValue: '1234'
+                            defaultValue: '2022'
                         }
                     }
                 }

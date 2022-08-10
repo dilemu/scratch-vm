@@ -20,12 +20,12 @@ const Pins = [
     ["A2", "A2"],
     ["A4", "A4"],
     ["A5", "A5"],
-    ["0", "0"],
-    ["2", "2"],
-    ["4", "4"],
-    ["5", "5"],
-    ["10", "10"],
-    ["12", "12"],
+    ["D0", "0"],
+    ["D2", "2"],
+    ["D4", "4"],
+    ["D5", "5"],
+    ["D10", "10"],
+    ["D12", "12"],
 ]
 
 const PNPID_LIST = [
@@ -125,7 +125,7 @@ class ArduinoNanoServo {
     getInfo() {
         return {
             id: 'ArduinoNanoServo',
-            name: "舵机模块（180°）",
+            name: "乐高兼容舵机（180°）",
             color1: '#00AAFF',
             color2: '#00AAFF',
             // menuIconURI: menuIconURI,
@@ -135,15 +135,15 @@ class ArduinoNanoServo {
                 {
                     opcode: 'readAnalogPin',
                     blockType: BlockType.COMMAND,
-                    text: '设置 [PIN] 引脚伺服舵机为 [ANGLE]度',
+                    text: '设置 [PIN] 的 舵机为 [ANGLE] 度',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
-                            defaultValue: 'A0-A1'
+                            defaultValue: '2'
                         },
                         ANGLE: {
-                            type: ArgumentType.NUMBER,
+                            type: ArgumentType.HALF_ANGLE,
                             defaultValue: 90
                         }
                     }

@@ -102,7 +102,7 @@ class ArduinoNanoFanControl {
                 {
                     opcode: 'start',
                     blockType: BlockType.COMMAND,
-                    text: '设置 风扇 管脚 [PIN] 的方向为 [DIRECTION] 转速为 [SPEED]',
+                    text: '设置 [PIN] 的风扇 [DIRECTION] 转速 [SPEED]',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
@@ -115,7 +115,7 @@ class ArduinoNanoFanControl {
                             defaultValue: 1
                         },
                         SPEED: {
-                            type: ArgumentType.NUMBER,
+                            type: ArgumentType.UINT8_NUMBER,
                             defaultValue: 100
                         }
                     }
