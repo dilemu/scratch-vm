@@ -21,8 +21,8 @@ const digitalPins = [
 ]
 
 const directionList = [
-    ["顺时针", 1],
-    ["逆时针", 2]
+    ["顺时针", "1"],
+    ["逆时针", "2"]
 ]
 
 class ArduinoNanoFanControl {
@@ -112,11 +112,11 @@ class ArduinoNanoFanControl {
                         DIRECTION: {
                             type: ArgumentType.STRING,
                             menu: 'DIRECTION_MENU',
-                            defaultValue: 1
+                            defaultValue: "1"
                         },
                         SPEED: {
                             type: ArgumentType.UINT8_NUMBER,
-                            defaultValue: 100
+                            defaultValue: "100"
                         }
                     }
                 }
