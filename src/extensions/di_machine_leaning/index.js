@@ -166,7 +166,7 @@ class MachineLearning {
                 },
                 {
                     opcode: "confidence",
-                    blockType: BlockType.COMMAND,
+                    blockType: BlockType.REPORTER,
                     text: formatMessage({
                         id: "machineLearning.confidence",
                         default: "[CLASS]信心",
