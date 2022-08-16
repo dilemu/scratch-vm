@@ -59,8 +59,8 @@ const Pins = {
     A3: 'A3',
     A4: 'A4',
     A5: 'A5',
-    A6: 'A6',
-    A7: 'A7'
+    A8: 'A8',
+    A9: 'A9'
 };
 
 /**
@@ -117,12 +117,12 @@ class OpenBlockArduinoNanoDevice extends OpenBlockArduinoUnoDevice{
                 value: Pins.A5
             },
             {
-                text: 'A6',
-                value: Pins.A6
+                text: 'A8',
+                value: Pins.A8
             },
             {
-                text: 'A7',
-                value: Pins.A7
+                text: 'A9',
+                value: Pins.A9
             }
         ];
     }

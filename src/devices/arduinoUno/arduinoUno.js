@@ -210,6 +210,14 @@ class OpenBlockArduinoUnoDevice {
             {
                 text: 'A5',
                 value: Pins.A5
+            },
+            {
+                text: 'A8',
+                value: Pins.A8
+            },
+            {
+                text: 'A9',
+                value: Pins.A9
             }
         ];
     }
