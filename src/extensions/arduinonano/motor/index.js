@@ -107,7 +107,7 @@ class ArduinoNanoMotor {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
-                            defaultValue: '5-6'
+                            defaultValue: 'D5-D6'
                         },
                         DIRECTION: {
                             type: ArgumentType.STRING,

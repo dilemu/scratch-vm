@@ -132,59 +132,59 @@ class OpenBlockArduinoUnoDevice {
     get PINS_MENU () {
         return [
             {
-                text: '0',
+                text: 'D0',
                 value: Pins.D0
             },
             {
-                text: '1',
+                text: 'D1',
                 value: Pins.D1
             },
             {
-                text: '2',
+                text: 'D2',
                 value: Pins.D2
             },
             {
-                text: '3',
+                text: 'D3',
                 value: Pins.D3
             },
             {
-                text: '4',
+                text: 'D4',
                 value: Pins.D4
             },
             {
-                text: '5',
+                text: 'D5',
                 value: Pins.D5
             },
             {
-                text: '6',
+                text: 'D6',
                 value: Pins.D6
             },
             {
-                text: '7',
+                text: 'D7',
                 value: Pins.D7
             },
             {
-                text: '8',
+                text: 'D8',
                 value: Pins.D8
             },
             {
-                text: '9',
+                text: 'D9',
                 value: Pins.D9
             },
             {
-                text: '10',
+                text: 'D10',
                 value: Pins.D10
             },
             {
-                text: '11',
+                text: 'D11',
                 value: Pins.D11
             },
             {
-                text: '12',
+                text: 'D12',
                 value: Pins.D12
             },
             {
-                text: '13',
+                text: 'D13',
                 value: Pins.D13
             },
             {
@@ -211,14 +211,14 @@ class OpenBlockArduinoUnoDevice {
                 text: 'A5',
                 value: Pins.A5
             },
-            {
-                text: 'A8',
-                value: Pins.A8
-            },
-            {
-                text: 'A9',
-                value: Pins.A9
-            }
+            // {
+            //     text: 'A8',
+            //     value: Pins.A8
+            // },
+            // {
+            //     text: 'A9',
+            //     value: Pins.A9
+            // }
         ];
     }
 
@@ -304,27 +304,27 @@ class OpenBlockArduinoUnoDevice {
     get PWM_PINS_MENU () {
         return [
             {
-                text: '3',
+                text: 'D3',
                 value: Pins.D3
             },
             {
-                text: '5',
+                text: 'D5',
                 value: Pins.D5
             },
             {
-                text: '6',
+                text: 'D6',
                 value: Pins.D6
             },
             {
-                text: '9',
+                text: 'D9',
                 value: Pins.D9
             },
             {
-                text: '10',
+                text: 'D10',
                 value: Pins.D10
             },
             {
-                text: '11',
+                text: 'D11',
                 value: Pins.D11
             }
         ];
