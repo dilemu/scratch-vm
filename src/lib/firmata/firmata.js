@@ -66,6 +66,8 @@ const SYSTEM_RESET = 0xFF;
 
 const MAX_PIN_COUNT = 128;
 
+const DHT_READ = 0x88;
+
 const symbolSendOneWireSearch = Symbol('sendOneWireSearch');
 const symbolSendOneWireRequest = Symbol('sendOneWireRequest');
 
@@ -534,6 +536,11 @@ const SYSEX_RESPONSE = {
             }
             board.emit(`serial-data-${portId}`, reply);
         }
+    },
+
+    [DHT_READ] (board) {
+        const result = board.buffer[0];
+        board.emit(`dht-data-${pin}`, result);
     }
 
 
@@ -873,6 +880,17 @@ class Firmata extends Emitter {
         this.reportAnalogPin(pin, 1);
         this.removeAllListeners(`analog-read-${pin}`);
         this.once(`analog-read-${pin}`, callback);
+    }
+
+    DHTRead (pin, mode, callback) {
+        writeToTransport(this, [
+            START_SYSEX,
+            DHT_READ,
+            pin,
+            mode,
+            END_SYSEX
+        ]);
+        this.once(`dht-data-${pin}`, callback);
     }
 
     /**

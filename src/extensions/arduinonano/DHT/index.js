@@ -139,49 +139,12 @@ class ArduinoNanoDHT {
     }
 
     async digitalRead(args) {
-        let laststate = 1;
-        const MAXTIMINGS = 85;
         const pinList = args.PIN;
         const type = args.TYPE;
-        const data = new Array(6);
-        const [a, b] = pinList.split("-");
-        data[0] = data[1] = data[2] = data[3] = data[4] = 0;
-        this._peripheral.setDigitalOutput(a, 'HIGH');
-        await sleep(250);
-        this._peripheral.setPinMode(a, 'OUTPUT');
-        this._peripheral.setDigitalOutput(a, 'LOW');
-        await sleep(20);
-        this._peripheral.setDigitalOutput(a, 'HIGH');
-        await sleep(0.04);
-        this._peripheral.setPinMode(a, 'INPUT');
-        let j = 0;
-        for (let i = 0; i < MAXTIMINGS; i++) {
-            let counter = 0;
-            while (await this._peripheral.readDigitalPin(a) == laststate) {
-                counter++;
-                await sleep(0.01);
-                if (counter === 255) {
-                    break;
-                }
-            }
-            laststate = await this._peripheral.readDigitalPin(a);
-
-            if (counter == 255) break;
-            
-            if(i >=4 && i%2 === 0) {
-                data[j / 8] <<= 1;
-                if(counter > 6) {
-                    data[j/8] |= 1;
-                }
-                j++;
-            }
+        const [a, b] = pinList.split('-');
+        if(type === 'TEMPERATURE') {
+            return await this._peripheral.DHTRead(a, 0);
         }
-        if ((j >= 40) &&
-            (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) {
-            return data[2];
-        }
-        return false;
-        return this._peripheral.readDigitalPin(a);
     }
 }
 

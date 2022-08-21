@@ -544,6 +544,20 @@ class ArduinoPeripheral{
         }
     }
 
+    DHTRead(pin, mode) {
+        if (this.isReady()) {
+            pin = this.parsePin(pin);
+            return new Promise(resolve => {
+                this._firmata.DHTRead(pin, mode, value => {
+                    resolve(value);
+                });
+                window.setTimeout(() => {
+                    resolve();
+                }, FrimataReadTimeout);
+            });
+        }
+    }
+
     /**
      * @param {PIN} pin - the pin to set.
      * @param {VALUE} value - the degree to set.
