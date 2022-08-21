@@ -507,6 +507,7 @@ class diBodyRecognition {
                     "POST",
                     this.runtime.REMOTE_HOST + this.REMOTE_URL.EMOTION
                 );
+                xhr.setRequestHeader("Access-Token", this.runtime.getToken());
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
@@ -545,6 +546,7 @@ class diBodyRecognition {
                     "POST",
                     this.runtime.REMOTE_HOST + this.REMOTE_URL.BODYNUM
                 );
+                xhr.setRequestHeader("Access-Token", this.runtime.getToken());
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
@@ -582,6 +584,7 @@ class diBodyRecognition {
                     "POST",
                     this.runtime.REMOTE_HOST + this.REMOTE_URL.CHARACTER
                 );
+                xhr.setRequestHeader("Access-Token", this.runtime.getToken());
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
@@ -624,6 +627,7 @@ class diBodyRecognition {
                     "POST",
                     this.runtime.REMOTE_HOST + this.REMOTE_URL.BODYAXES
                 );
+                xhr.setRequestHeader("Access-Token", this.runtime.getToken());
                 xhr.send(form);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState == 4) {
