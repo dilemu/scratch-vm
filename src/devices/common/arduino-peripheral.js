@@ -544,6 +544,8 @@ class ArduinoPeripheral{
         }
     }
 
+    // dileban device
+
     DHTRead(pin, mode) {
         if (this.isReady()) {
             pin = this.parsePin(pin);
@@ -555,6 +557,14 @@ class ArduinoPeripheral{
                     resolve();
                 }, FrimataReadTimeout);
             });
+        }
+    }
+
+    FGCDDisplayString(a, b, text) {
+        if (this.isReady()) {
+            const pinA = this.parsePin(a);
+            const pinB = this.parsePin(b);
+            return this._firmata.FGCDDisplayString(pinA, pinB, text);
         }
     }
 

@@ -145,6 +145,9 @@ class ArduinoNanoDHT {
         if(type === 'TEMPERATURE') {
             return await this._peripheral.DHTRead(a, 0);
         }
+        if (type === 'HUMIDITY') {
+            return await this._peripheral.DHTRead(a, 1);
+        }
     }
 }
 

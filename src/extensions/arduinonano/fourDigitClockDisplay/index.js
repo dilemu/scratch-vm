@@ -132,27 +132,10 @@ class ArduinoFourDigitClockDisplay {
     }
 
     displayString(args) {
-        this._peripheral._firmata.i2cConfig(50)
-        const iNumDigits = 4;
         const pinList = args.PIN;
-        const [pin, b] = pinList.split('-');
+        const [a, b] = pinList.split('-');
         let text = args.TEXT;
-        const slen = text.length;
-        const writeBuffer = [];
-        for(let i = 0; i < 4 - slen; i++) {
-            text = " " + text;
-        }
-        for (let i = 0; i < iNumDigits; i++) {
-            const a = CDigit[text.charCodeAt(i)] & 0b01111111
-            const dot = CDigit[text.charCodeAt(i)] & 0b10000000
-            writeBuffer.push(CDigit[a]);
-            if(a) {
-                this._peripheral._firmata.i2cWrite(0x34+i, writeBuffer[i] | dot);
-            } else {
-                break;
-            }
-        }
-        return console.log(this._peripheral._firmata);
+        return this._peripheral.FGCDDisplayString(a, b, text);
     }
 }
 

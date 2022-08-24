@@ -66,7 +66,8 @@ const SYSTEM_RESET = 0xFF;
 
 const MAX_PIN_COUNT = 128;
 
-const DHT_READ = 0x88;
+const DHT_READ = 0x28;
+const FGCD_DISPLAY_STRING = 0x29;
 
 const symbolSendOneWireSearch = Symbol('sendOneWireSearch');
 const symbolSendOneWireRequest = Symbol('sendOneWireRequest');
@@ -220,10 +221,7 @@ const MIDI_RESPONSE = {
         }
 
         board.emit(`analog-read-${pin}`, value);
-        board.emit('analog-read', {
-            pin,
-            value
-        });
+        console.log(pin, value)
     },
 
     /**
@@ -882,6 +880,8 @@ class Firmata extends Emitter {
         this.once(`analog-read-${pin}`, callback);
     }
 
+    // dileban device
+
     DHTRead (pin, mode, callback) {
         writeToTransport(this, [
             START_SYSEX,
@@ -890,7 +890,17 @@ class Firmata extends Emitter {
             mode,
             END_SYSEX
         ]);
-        this.once(`dht-data-${pin}`, callback);
+        
+        this.once(`analog-read-${pin}`, callback);
+    }
+
+    FGCDDisplayString(a, b, text) {
+        writeToTransport(this, [
+            START_SYSEX,
+            FGCD_DISPLAY_STRING,
+            a, b, text,
+            END_SYSEX
+        ]);
     }
 
     /**
