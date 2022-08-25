@@ -158,7 +158,7 @@ class ArduinoNanoServo {
         };
     }
 
-    async angle(args, util) {
+    angle(args, util) {
         const PIN = args.PIN;
         const [a, b] = PIN.split('-');
         const ANGLE = args.ANGLE;

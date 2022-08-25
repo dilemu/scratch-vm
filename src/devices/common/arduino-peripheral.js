@@ -593,14 +593,7 @@ class ArduinoPeripheral{
     servoAngle(pin, angle) {
         if (this.isReady()) {
             pin = this.parsePin(pin);
-            return new Promise(resolve => {
-                this._firmata.servoAngle(pin, angle, value => {
-                    resolve(value);
-                });
-                window.setTimeout(() => {
-                    resolve();
-                }, FrimataReadTimeout);
-            });
+            this._firmata.servoAngle(pin, angle);
         }
     }
 

@@ -49,6 +49,7 @@ const builtinExtensions = {
     ArduinoNanoServo: () => require("../extensions/arduinonano/servo"),
     ArduinoNanRedAndGreenLED: () => require("../extensions/arduinonano/redAndGreenLED"),
     ArduinoNanoLED: () => require("../extensions/arduinonano/LED"),
+    ArduinoNanoUltrasonic: () => require("../extensions/arduinonano/Ultrasonic"),
 };
 
 const builtinDevices = {

@@ -134,7 +134,7 @@ class ArduinoNanoUltrasonic {
             blocks: [
                 {
                     opcode: 'readAnalogPin',
-                    blockType: BlockType.BOOLEAN,
+                    blockType: BlockType.REPORTER,
                     text: '读取 [PIN] 的超声波测距值(cm)',
                     arguments: {
                         PIN: {
@@ -156,7 +156,7 @@ class ArduinoNanoUltrasonic {
     async readAnalogPin(args, util) {
         const PIN = args.PIN;
         const [a, b] = PIN.split('-');
-        return this._peripheral.ultrasonicRead(a, b);
+        return await this._peripheral.ultrasonicRead(a, b);
     }
 }
 

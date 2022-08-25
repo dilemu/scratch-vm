@@ -894,17 +894,20 @@ class Firmata extends Emitter {
             mode,
             END_SYSEX
         ]);
-        
+        this.removeAllListeners(`analog-read-${pin}`);
         this.once(`analog-read-${pin}`, callback);
     }
 
-    FGCDDisplayString(a, b, text) {
+    FGCDDisplayString(a, b, text, callback) {
+        const _text = parseInt(text) + '';
+        const textLength = _text.length;
         writeToTransport(this, [
             START_SYSEX,
             FGCD_DISPLAY_STRING,
-            a, b, text,
+            a, b, textLength, ..._text.split(''),
             END_SYSEX
         ]);
+        this.once(`analog-read-${a}`, ()=>{});
     }
 
     passiveBuzzerPlay(pin, mode, tone, beat) {
@@ -923,8 +926,8 @@ class Firmata extends Emitter {
             a, b,
             END_SYSEX
         ]);
-
-        this.once(`analog-read-${pin}`, callback);
+        this.removeAllListeners(`analog-read-${a}`);
+        this.once(`analog-read-${a}`, callback);
     }
 
     servoAngle(pin, angle) {
@@ -934,8 +937,6 @@ class Firmata extends Emitter {
             pin, angle,
             END_SYSEX
         ]);
-
-        this.once(`analog-read-${pin}`, callback);
     }
 
     /**
