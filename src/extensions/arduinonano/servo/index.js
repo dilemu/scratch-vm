@@ -134,7 +134,7 @@ class ArduinoNanoServo {
             // showStatusButton: true,
             blocks: [
                 {
-                    opcode: 'readAnalogPin',
+                    opcode: 'angle',
                     blockType: BlockType.COMMAND,
                     text: '设置 [PIN] 的 舵机为 [ANGLE] 度',
                     arguments: {
@@ -158,25 +158,11 @@ class ArduinoNanoServo {
         };
     }
 
-    async readAnalogPin(args, util) {
+    async angle(args, util) {
         const PIN = args.PIN;
-        const parsePin = (pin) => {
-            if (pin.charAt(0) === 'A') {
-                return parseInt(pin.slice(1), 10) + 14;
-            }
-            return parseInt(pin, 10);
-        }
-        let degrees = 10;
-        let incrementer = 10;
-        this._peripheral._firmata.servoConfig(parsePin(PIN), 544, 2400);
-        setInterval(() => {
-            if (degrees >= 180 || degrees === 0) {
-                incrementer *= -1;
-            }
-            degrees += incrementer;
-            this._peripheral._firmata.servoWrite(parsePin(PIN), degrees);
-            console.log(degrees);
-        }, 500);
+        const [a, b] = PIN.split('-');
+        const ANGLE = args.ANGLE;
+        return this._peripheral.servoAngle(a, ANGLE);
     }
 }
 

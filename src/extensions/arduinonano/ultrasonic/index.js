@@ -155,35 +155,8 @@ class ArduinoNanoUltrasonic {
 
     async readAnalogPin(args, util) {
         const PIN = args.PIN;
-        const st = Date.now();
-        const micros = () => { return (Date.now() - st) / 1000; }
-        const state = this._getState(util.target);
         const [a, b] = PIN.split('-');
-        const CM = 28;
-        const delayMicroseconds = ms => {
-            return new Promise(resolve => {
-                setTimeout(resolve, ms/1000);
-            })
-        }
-        // init pin
-        this._peripheral.setPinMode(a, 'OUTPUT');
-        this._peripheral.setPinMode(b, 'INPUT');
-        // read
-        const timing = () => {
-            this._peripheral.digitalWrite(a, 0);
-            delayMicroseconds(2);
-            this._peripheral.digitalWrite(a, 1);
-            delayMicroseconds(10);
-            this._peripheral.digitalWrite(a, 0);
-
-            let previousMicros = micros();
-            while (!await this._peripheral.readDigitalPin(echo) && (micros() - previousMicros) <= timeout); // wait for the echo pin HIGH or timeout
-            previousMicros = micros();
-            while (digitalRead(echo) && (micros() - previousMicros) <= timeout); // wait for the echo pin LOW or timeout
-
-            return micros() - previousMicros; // duration
-        }
-        return timing() / CM / 2;
+        return this._peripheral.ultrasonicRead(a, b);
     }
 }
 

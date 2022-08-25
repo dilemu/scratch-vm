@@ -68,6 +68,10 @@ const MAX_PIN_COUNT = 128;
 
 const DHT_READ = 0x28;
 const FGCD_DISPLAY_STRING = 0x29;
+const PASSIVE_BUZZER = 0x30;
+const RGBLED_DISPLAY = 0x31;
+const ULTRASONIC_READ = 0x32;
+const SERVO_ANGLE = 0x33;
 
 const symbolSendOneWireSearch = Symbol('sendOneWireSearch');
 const symbolSendOneWireRequest = Symbol('sendOneWireRequest');
@@ -901,6 +905,37 @@ class Firmata extends Emitter {
             a, b, text,
             END_SYSEX
         ]);
+    }
+
+    passiveBuzzerPlay(pin, mode, tone, beat) {
+        writeToTransport(this, [
+            START_SYSEX,
+            PASSIVE_BUZZER,
+            pin, mode, tone, beat,
+            END_SYSEX
+        ]);
+    }
+
+    ultrasonicRead(a, b, callback) {
+        writeToTransport(this, [
+            START_SYSEX,
+            ULTRASONIC_READ,
+            a, b,
+            END_SYSEX
+        ]);
+
+        this.once(`analog-read-${pin}`, callback);
+    }
+
+    servoAngle(pin, angle) {
+        writeToTransport(this, [
+            START_SYSEX,
+            SERVO_ANGLE,
+            pin, angle,
+            END_SYSEX
+        ]);
+
+        this.once(`analog-read-${pin}`, callback);
     }
 
     /**

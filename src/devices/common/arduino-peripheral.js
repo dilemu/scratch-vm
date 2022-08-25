@@ -568,6 +568,42 @@ class ArduinoPeripheral{
         }
     }
 
+    passiveBuzzerPlay(pin, mode, tone, beat) {
+        if (this.isReady()) {
+            pin = this.parsePin(pin);
+            return this._firmata.passiveBuzzerPlay(pin, mode, tone, beat);
+        }
+    }
+
+    ultrasonicRead(a, b) {
+        if (this.isReady()) {
+            const pinA = this.parsePin(a);
+            const pinB = this.parsePin(b);
+            return new Promise(resolve => {
+                this._firmata.ultrasonicRead(pinA, pinB, value => {
+                    resolve(value)
+                });
+                window.setTimeout(() => {
+                    resolve();
+                }, FrimataReadTimeout);
+            })
+        }
+    }
+
+    servoAngle(pin, angle) {
+        if (this.isReady()) {
+            pin = this.parsePin(pin);
+            return new Promise(resolve => {
+                this._firmata.servoAngle(pin, angle, value => {
+                    resolve(value);
+                });
+                window.setTimeout(() => {
+                    resolve();
+                }, FrimataReadTimeout);
+            });
+        }
+    }
+
     /**
      * @param {PIN} pin - the pin to set.
      * @param {VALUE} value - the degree to set.
