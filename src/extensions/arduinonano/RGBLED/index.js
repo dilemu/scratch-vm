@@ -14,60 +14,30 @@ const ArduinoPeripheral = require('../../../devices/common/arduino-peripheral');
 // eslint-disable-next-line max-len
 const blockIconURI = '';
 const menuIconURI = blockIconURI;
+const colour = '#32C850';
 
 const Pins = [
-    ["A0", "A0"],
-    ["A2", "A2"],
-    ["A4", "A4"],
-    ["A5", "A5"],
-    ["D0", "0"],
-    ["D2", "2"],
-    ["D4", "4"],
-    ["D5", "5"],
-    ["D8", "8"],
-    ["D10", "10"],
-    ["D11", "11"],
-    ["D12", "12"],
+    ["A0-A1", "A0-A1"],
+    ["A2-A3", "A2-A3"],
+    ["A4-A5", "A4-A5"],
+
+    ["D2-D3", "2-3"],
+    ["D4-D7", "4-7"],
+    ["D5-D6", "5-6"],
+    ["D8-D9", "8-9"],
+    ["D10-D11", "10-11"],
+    ["D12-D13", "12-13"]
 ]
 
-const PNPID_LIST = [
-    // For chinese clones that use CH340
-    'USB\\VID_1A86&PID_7523'
-];
+const LEDIndex = [
+    ["全部", "0"],
+    ["第一个", "1"],
+    ["第二个", "2"],
+    ["第三个", "3"],
+    ["第四个", "4"],
+]
 
-/**
- * Configuration of serialport
- * @readonly
- */
-const SERIAL_CONFIG = {
-    baudRate: 57600,
-    dataBits: 8,
-    stopBits: 1
-};
-
-/**
- * Configuration for arduino-cli.
- * @readonly
- */
-const DIVECE_OPT = {
-    type: 'arduino',
-    fqbn: 'arduino:avr:nano:cpu=atmega328',
-    firmware: 'arduinoUnoUltra.standardFirmata.ino.hex'
-};
-
-class ArduinoUno extends ArduinoPeripheral {
-    /**
-     * Construct a Arduino communication object.
-     * @param {Runtime} runtime - the OpenBlock runtime
-     * @param {string} deviceId - the id of the extension
-     * @param {string} originalDeviceId - the original id of the peripheral, like xxx_arduinoUno
-     */
-    constructor(runtime, deviceId, originalDeviceId) {
-        super(runtime, deviceId, originalDeviceId, PNPID_LIST, SERIAL_CONFIG, DIVECE_OPT);
-    }
-}
-
-class ArduinoNanoServo {
+class ArduinoNanRedAndGreenLED {
     constructor(runtime) {
         /**
          * The runtime instantiating this block package.
@@ -83,7 +53,7 @@ class ArduinoNanoServo {
      * @type {string}
      */
     static get STATE_KEY() {
-        return 'Scratch.ArduinoNanoServo';
+        return 'Scratch.ArduinoNanRedAndGreenLED';
     }
 
     /**
@@ -106,6 +76,13 @@ class ArduinoNanoServo {
         }));
     }
 
+    get LIGHT_STATUS_MENU() {
+        return lightStatus.map(light => ({
+            text: light[0],
+            value: light[1]
+        }));
+    }
+
 
     /**
      * @param {Target} target - collect  state for this target.
@@ -113,10 +90,10 @@ class ArduinoNanoServo {
      * @private
      */
     _getState(target) {
-        let state = target.getCustomState(ArduinoNanoServo.STATE_KEY);
+        let state = target.getCustomState(ArduinoNanRedAndGreenLED.STATE_KEY);
         if (!state) {
-            state = Clone.simple(ArduinoNanoServo.DEFAULT_HELLOWORLD_STATE);
-            target.setCustomState(ArduinoNanoServo.STATE_KEY, state);
+            state = Clone.simple(ArduinoNanRedAndGreenLED.DEFAULT_HELLOWORLD_STATE);
+            target.setCustomState(ArduinoNanRedAndGreenLED.STATE_KEY, state);
         }
         return state;
     }
@@ -126,28 +103,41 @@ class ArduinoNanoServo {
      */
     getInfo() {
         return {
-            id: 'ArduinoNanoServo',
-            name: "乐高兼容舵机（180°）",
-            color1: '#00AAFF',
-            color2: '#00AAFF',
+            id: 'ArduinoNanRedAndGreenLED',
+            name: "红绿双色灯",
+            color1: colour,
+            color2: colour,
             // menuIconURI: menuIconURI,
             blockIconURI: blockIconURI,
             // showStatusButton: true,
             blocks: [
                 {
-                    opcode: 'angle',
+                    opcode: 'digitalWrite',
                     blockType: BlockType.COMMAND,
-                    text: '设置 [PIN] 的 舵机为 [ANGLE] 度',
+                    text: '设置 [PIN]的 全彩灯 [INDEX] 灯 颜色为 R %3 G %4 B %5',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
-                            defaultValue: '2'
+                            defaultValue: 'A0-A1'
                         },
-                        ANGLE: {
-                            type: ArgumentType.HALF_ANGLE,
-                            defaultValue: 90
-                        }
+                        INDEX: {
+                            type: ArgumentType.STRING,
+                            menu: 'LED_INDEX',
+                            defaultValue: '0'
+                        },
+                        R: {
+                            type: ArgumentType.UINT8_NUMBER,
+                            defaultValue: '100'
+                        },
+                        G: {
+                            type: ArgumentType.UINT8_NUMBER,
+                            defaultValue: '100'
+                        },
+                        B: {
+                            type: ArgumentType.UINT8_NUMBER,
+                            defaultValue: '100'
+                        },
                     }
                 }
             ],
@@ -155,17 +145,18 @@ class ArduinoNanoServo {
                 ANALOG_PINS_MENU: {
                     items: this.ANALOG_PINS_MENU
                 },
+                LED_INDEX: {
+                    items: this.LEDIndex
+                }
             }
         };
     }
 
-    angle(args, util) {
-        const PIN = args.PIN;
-        const [a, b] = PIN.split('-');
-        const ANGLE = args.ANGLE;
-        return this._peripheral.servoAngle(a, ANGLE);
+    digitalWrite(args, util) {
+        const { PIN: pinList, INDEX, R, G, B } = args;
+        const [a, b] = pinList.split('-');
+        return this._peripheral.RGBLED_DISPLAY(a,R,G,B);
     }
 }
 
-
-module.exports = ArduinoNanoServo;
+module.exports = ArduinoNanRedAndGreenLED;

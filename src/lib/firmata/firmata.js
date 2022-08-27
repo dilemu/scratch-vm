@@ -901,10 +901,11 @@ class Firmata extends Emitter {
     FGCDDisplayString(a, b, text, callback) {
         const _text = parseInt(text) + '';
         const textLength = _text.length;
+        const textList = _text.split('').map(v => parseInt(v))
         writeToTransport(this, [
             START_SYSEX,
             FGCD_DISPLAY_STRING,
-            a, b, textLength, ..._text.split(''),
+            a, b, textLength, ...textList,
             END_SYSEX
         ]);
         this.once(`analog-read-${a}`, ()=>{});
@@ -930,6 +931,16 @@ class Firmata extends Emitter {
         this.once(`analog-read-${a}`, callback);
     }
 
+    RGBLEDDisplay(pin, R, G, B) {
+        writeToTransport(this, [
+            START_SYSEX,
+            RGBLED_DISPLAY,
+            pin, R, G, B,
+            END_SYSEX
+        ]);
+        this.once(`analog-read-${a}`, () => { });
+    }
+
     servoAngle(pin, angle) {
         writeToTransport(this, [
             START_SYSEX,
@@ -937,6 +948,7 @@ class Firmata extends Emitter {
             pin, angle,
             END_SYSEX
         ]);
+        this.once(`analog-read-${pin}`, () => { });
     }
 
     /**

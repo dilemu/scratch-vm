@@ -590,10 +590,17 @@ class ArduinoPeripheral{
         }
     }
 
+    RGBLEDDisplay(pin, R, G, B) {
+        if (this.isReady()) {
+            pin = this.parsePin(pin);
+            return this._firmata.RGBLEDDisplay(pin, R, G, B);
+        }
+    }
+
     servoAngle(pin, angle) {
         if (this.isReady()) {
             pin = this.parsePin(pin);
-            this._firmata.servoAngle(pin, angle);
+            return this._firmata.servoAngle(pin, angle);
         }
     }
 
