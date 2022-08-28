@@ -37,7 +37,7 @@ const LEDIndex = [
     ["第四个", "4"],
 ]
 
-class ArduinoNanRedAndGreenLED {
+class ArduinoNanRGBLED {
     constructor(runtime) {
         /**
          * The runtime instantiating this block package.
@@ -53,7 +53,7 @@ class ArduinoNanRedAndGreenLED {
      * @type {string}
      */
     static get STATE_KEY() {
-        return 'Scratch.ArduinoNanRedAndGreenLED';
+        return 'Scratch.ArduinoNanRGBLED';
     }
 
     /**
@@ -76,10 +76,10 @@ class ArduinoNanRedAndGreenLED {
         }));
     }
 
-    get LIGHT_STATUS_MENU() {
-        return lightStatus.map(light => ({
-            text: light[0],
-            value: light[1]
+    get LEDIndex () {
+        return LEDIndex.map(pin => ({
+            text: pin[0],
+            value: pin[1]
         }));
     }
 
@@ -90,10 +90,10 @@ class ArduinoNanRedAndGreenLED {
      * @private
      */
     _getState(target) {
-        let state = target.getCustomState(ArduinoNanRedAndGreenLED.STATE_KEY);
+        let state = target.getCustomState(ArduinoNanRGBLED.STATE_KEY);
         if (!state) {
-            state = Clone.simple(ArduinoNanRedAndGreenLED.DEFAULT_HELLOWORLD_STATE);
-            target.setCustomState(ArduinoNanRedAndGreenLED.STATE_KEY, state);
+            state = Clone.simple(ArduinoNanRGBLED.DEFAULT_HELLOWORLD_STATE);
+            target.setCustomState(ArduinoNanRGBLED.STATE_KEY, state);
         }
         return state;
     }
@@ -103,7 +103,7 @@ class ArduinoNanRedAndGreenLED {
      */
     getInfo() {
         return {
-            id: 'ArduinoNanRedAndGreenLED',
+            id: 'ArduinoNanRGBLED',
             name: "红绿双色灯",
             color1: colour,
             color2: colour,
@@ -114,7 +114,7 @@ class ArduinoNanRedAndGreenLED {
                 {
                     opcode: 'digitalWrite',
                     blockType: BlockType.COMMAND,
-                    text: '设置 [PIN]的 全彩灯 [INDEX] 灯 颜色为 R %3 G %4 B %5',
+                    text: '设置 [PIN]的 全彩灯 [INDEX] 灯 颜色为 R [R] G [G] B [B]',
                     arguments: {
                         PIN: {
                             type: ArgumentType.STRING,
@@ -155,8 +155,8 @@ class ArduinoNanRedAndGreenLED {
     digitalWrite(args, util) {
         const { PIN: pinList, INDEX, R, G, B } = args;
         const [a, b] = pinList.split('-');
-        return this._peripheral.RGBLED_DISPLAY(a,R,G,B);
+        return this._peripheral.RGBLEDDisplay(a,INDEX,R,G,B);
     }
 }
 
-module.exports = ArduinoNanRedAndGreenLED;
+module.exports = ArduinoNanRGBLED;

@@ -912,10 +912,12 @@ class Firmata extends Emitter {
     }
 
     passiveBuzzerPlay(pin, mode, tone, beat) {
+        tone = parseInt(tone);
+        beat = parseInt(beat);
         writeToTransport(this, [
             START_SYSEX,
             PASSIVE_BUZZER,
-            pin, mode, tone, beat,
+            pin, mode, tone & 0x7F, (tone >> 7) & 0x7F, beat & 0x7F, (beat >> 7) & 0x7F,
             END_SYSEX
         ]);
     }
@@ -931,14 +933,13 @@ class Firmata extends Emitter {
         this.once(`analog-read-${a}`, callback);
     }
 
-    RGBLEDDisplay(pin, R, G, B) {
+    RGBLEDDisplay(pin, index, R, G, B) {
         writeToTransport(this, [
             START_SYSEX,
             RGBLED_DISPLAY,
-            pin, R, G, B,
+            pin, index, R, G, B,
             END_SYSEX
         ]);
-        this.once(`analog-read-${a}`, () => { });
     }
 
     servoAngle(pin, angle) {
