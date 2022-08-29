@@ -945,6 +945,7 @@ class Firmata extends Emitter {
     }
 
     servoAngle(pin, angle) {
+        angle = parseInt(angle, 10);
         writeToTransport(this, [
             START_SYSEX,
             SERVO_ANGLE,
