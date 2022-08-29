@@ -135,6 +135,7 @@ class ArduinoNanoUltrasonic {
                 {
                     opcode: 'readAnalogPin',
                     blockType: BlockType.REPORTER,
+                    checkboxInFlyout: false,
                     text: '读取 [PIN] 的超声波测距值(cm)',
                     arguments: {
                         PIN: {
