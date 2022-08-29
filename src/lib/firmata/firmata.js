@@ -894,8 +894,9 @@ class Firmata extends Emitter {
             mode,
             END_SYSEX
         ]);
-        this.removeAllListeners(`analog-read-${pin}`);
-        this.once(`analog-read-${pin}`, callback);
+        // 此处固定使用D2传输数据
+        this.removeAllListeners(`analog-read-2`);
+        this.once(`analog-read-2`, callback);
     }
 
     FGCDDisplayString(a, b, text, callback) {
@@ -929,8 +930,9 @@ class Firmata extends Emitter {
             a, b,
             END_SYSEX
         ]);
-        this.removeAllListeners(`analog-read-${a}`);
-        this.once(`analog-read-${a}`, callback);
+        // 此处固定使用D2传输数据
+        this.removeAllListeners(`analog-read-2`);
+        this.once(`analog-read-2`, callback);
     }
 
     RGBLEDDisplay(pin, index, R, G, B) {
