@@ -65,35 +65,35 @@ class diBodyRecognition {
                     id: "imageRecognition.time_1",
                     default: "1",
                 }),
-                value: 1,
+                value: "1",
             },
             {
                 name: formatMessage({
                     id: "imageRecognition.time_2",
                     default: "2",
                 }),
-                value: 2,
+                value: "2",
             },
             {
                 name: formatMessage({
                     id: "imageRecognition.time_31",
                     default: "3",
                 }),
-                value: 3,
+                value: "3",
             },
             {
                 name: formatMessage({
                     id: "imageRecognition.time_4",
                     default: "4",
                 }),
-                value: 4,
+                value: "4",
             },
             {
                 name: formatMessage({
                     id: "imageRecognition.time_5",
                     default: "5",
                 }),
-                value: 5,
+                value: "5",
             },
         ];
     }
@@ -293,7 +293,7 @@ class diBodyRecognition {
                         WAIT_TIME: {
                             type: ArgumentType.NUMBER,
                             menu: "WAIT_TIME_LIST",
-                            defaultValue: 2,
+                            defaultValue: "2",
                         },
                     },
                 },
@@ -318,7 +318,7 @@ class diBodyRecognition {
                         WAIT_TIME: {
                             type: ArgumentType.NUMBER,
                             menu: "WAIT_TIME_LIST",
-                            defaultValue: 2,
+                            defaultValue: "2",
                         },
                     },
                 },
@@ -343,7 +343,7 @@ class diBodyRecognition {
                         WAIT_TIME: {
                             type: ArgumentType.NUMBER,
                             menu: "WAIT_TIME_LIST",
-                            defaultValue: 2,
+                            defaultValue: "2",
                         },
                     },
                 },
@@ -368,7 +368,7 @@ class diBodyRecognition {
                         WAIT_TIME: {
                             type: ArgumentType.NUMBER,
                             menu: "WAIT_TIME_LIST",
-                            defaultValue: 2,
+                            defaultValue: "2",
                         },
                     },
                 },
@@ -400,7 +400,7 @@ class diBodyRecognition {
                         WAIT_TIME: {
                             type: ArgumentType.NUMBER,
                             menu: "WAIT_TIME_LIST",
-                            defaultValue: 2,
+                            defaultValue: "2",
                         },
                     },
                 },
@@ -459,8 +459,8 @@ class diBodyRecognition {
         };
         this.runtime.emit("start_web_cam", options);
         return new Promise((resolve, reject) => {
-            this.runtime.on(uuid, (blob) => {
-                if (!blob) reject();
+            this.runtime.once(uuid, (blob) => {
+                if (!blob) return reject();
                 const form = new FormData();
                 form.append("file", blob);
                 const xhr = new XMLHttpRequest();
@@ -498,8 +498,8 @@ class diBodyRecognition {
         };
         this.runtime.emit("start_web_cam", options);
         return new Promise((resolve, reject) => {
-            this.runtime.on(uuid, (blob) => {
-                if (!blob) reject();
+            this.runtime.once(uuid, (blob) => {
+                if (!blob) return reject();
                 const form = new FormData();
                 form.append("file", blob);
                 const xhr = new XMLHttpRequest();
@@ -537,8 +537,8 @@ class diBodyRecognition {
         };
         this.runtime.emit("start_web_cam", options);
         return new Promise((resolve, reject) => {
-            this.runtime.on(uuid, (blob) => {
-                if (!blob) reject();
+            this.runtime.once(uuid, (blob) => {
+                if (!blob) return reject();
                 const form = new FormData();
                 form.append("file", blob);
                 const xhr = new XMLHttpRequest();
@@ -575,8 +575,8 @@ class diBodyRecognition {
         };
         this.runtime.emit("start_web_cam", options);
         return new Promise((resolve, reject) => {
-            this.runtime.on(uuid, (blob) => {
-                if (!blob) reject();
+            this.runtime.once(uuid, (blob) => {
+                if (!blob) return reject();
                 const form = new FormData();
                 form.append("file", blob);
                 const xhr = new XMLHttpRequest();
@@ -618,8 +618,8 @@ class diBodyRecognition {
         };
         this.runtime.emit("start_web_cam", options);
         return new Promise((resolve, reject) => {
-            this.runtime.on(uuid, (blob) => {
-                if (!blob) reject();
+            this.runtime.once(uuid, (blob) => {
+                if (!blob) return reject();
                 const form = new FormData();
                 form.append("file", blob);
                 const xhr = new XMLHttpRequest();

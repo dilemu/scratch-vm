@@ -386,8 +386,8 @@ class TextRecognition {
         };
         this.runtime.emit("start_web_cam", options);
         return new Promise((resolve, reject) => {
-            this.runtime.on(uuid, (blob) => {
-                if (!blob) reject();
+            this.runtime.once(uuid, (blob) => {
+                if (!blob) return reject();
                 const form = new FormData();
                 form.append("file", blob);
                 const xhr = new XMLHttpRequest();
