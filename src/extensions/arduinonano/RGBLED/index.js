@@ -146,7 +146,8 @@ class ArduinoNanRGBLED {
                     items: this.ANALOG_PINS_MENU
                 },
                 LED_INDEX: {
-                    items: this.LEDIndex
+                    items: this.LEDIndex,
+                    acceptReporters: true
                 }
             }
         };

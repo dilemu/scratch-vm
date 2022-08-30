@@ -168,7 +168,8 @@ class ArduinoNanoServo {
         const PIN = args.PIN;
         const [a, b] = PIN.split('-');
         const ANGLE = args.ANGLE;
-        return this._peripheral.servoAngle(a, ANGLE);
+        // return this._peripheral.servoAngle(a, ANGLE);
+        return this._peripheral.setServoOutput(a, ANGLE);
     }
 }
 
