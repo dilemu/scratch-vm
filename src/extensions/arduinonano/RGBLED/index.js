@@ -156,7 +156,10 @@ class ArduinoNanRGBLED {
     digitalWrite(args, util) {
         const { PIN: pinList, INDEX, R, G, B } = args;
         const [a, b] = pinList.split('-');
-        return this._peripheral.RGBLEDDisplay(a,INDEX,R,G,B);
+        let index = INDEX;
+        if (INDEX == "3") index = "4";
+        else if (INDEX == "4") index = "3";
+        return this._peripheral.RGBLEDDisplay(a, index,R,G,B);
     }
 }
 
