@@ -104,7 +104,7 @@ class ArduinoNanRGBLED {
     getInfo() {
         return {
             id: 'ArduinoNanRGBLED',
-            name: "红绿双色灯",
+            name: "全彩灯模块",
             color1: colour,
             color2: colour,
             // menuIconURI: menuIconURI,
