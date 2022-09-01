@@ -139,6 +139,22 @@ class ArduinoNanRGBLED {
                             defaultValue: '100'
                         },
                     }
+                },
+                {
+                    opcode: 'setBrightness',
+                    blockType: BlockType.COMMAND,
+                    text: '设置 [PIN]的全彩灯亮度为 [BRIGHT]',
+                    arguments: {
+                        PIN: {
+                            type: ArgumentType.STRING,
+                            menu: 'ANALOG_PINS_MENU',
+                            defaultValue: 'A0-A1'
+                        },
+                        BRIGHT: {
+                            type: ArgumentType.UINT8_NUMBER,
+                            defaultValue: '50'
+                        }
+                    }
                 }
             ],
             menus: {
@@ -160,6 +176,12 @@ class ArduinoNanRGBLED {
         if (INDEX == "3") index = "4";
         else if (INDEX == "4") index = "3";
         return this._peripheral.RGBLEDDisplay(a, index,R,G,B);
+    }
+
+    setBrightness(args) {
+        const { PIN: pinList, BRIGHT } = args;
+        const [a, b] = pinList.split('-');
+        return this._peripheral.RGBLEDSetBirghtness(a, BRIGHT);
     }
 }
 

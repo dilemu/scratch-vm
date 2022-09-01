@@ -70,6 +70,7 @@ const DHT_READ = 0x28;
 const FGCD_DISPLAY_STRING = 0x29;
 const PASSIVE_BUZZER = 0x30;
 const RGBLED_DISPLAY = 0x31;
+const RGBLED_SET_BIRGHTNESS = 0x34;
 const ULTRASONIC_READ = 0x32;
 const SERVO_ANGLE = 0x33;
 
@@ -940,6 +941,15 @@ class Firmata extends Emitter {
             START_SYSEX,
             RGBLED_DISPLAY,
             pin, index, R, G, B,
+            END_SYSEX
+        ]);
+    }
+
+    RGBLEDSetBirghtness(pin, BRIGHT) {
+        writeToTransport(this, [
+            START_SYSEX,
+            RGBLED_SET_BIRGHTNESS,
+            pin, BRIGHT,
             END_SYSEX
         ]);
     }

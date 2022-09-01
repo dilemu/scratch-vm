@@ -597,6 +597,13 @@ class ArduinoPeripheral{
         }
     }
 
+    RGBLEDSetBirghtness(pin, BRIGHT) {
+        if (this.isReady()) {
+            pin = this.parsePin(pin);
+            return this._firmata.RGBLEDSetBirghtness(pin, BRIGHT);
+        }
+    }
+
     servoAngle(pin, angle) {
         if (this.isReady()) {
             pin = this.parsePin(pin);
