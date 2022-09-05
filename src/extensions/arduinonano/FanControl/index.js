@@ -16,8 +16,8 @@ const blockIconURI = '';
 const menuIconURI = blockIconURI;
 
 const digitalPins = [
-    ["D5-D6", "D5-D6"],
-    ["D10-D11", "D10-D11"]
+    ["D5-D6", "5-6"],
+    ["D10-D11", "10-11"]
 ]
 
 const directionList = [
@@ -107,7 +107,7 @@ class ArduinoNanoFanControl {
                         PIN: {
                             type: ArgumentType.STRING,
                             menu: 'ANALOG_PINS_MENU',
-                            defaultValue: 'D5-D6'
+                            defaultValue: '5-6'
                         },
                         DIRECTION: {
                             type: ArgumentType.STRING,
