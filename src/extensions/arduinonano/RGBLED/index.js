@@ -37,7 +37,7 @@ const LEDIndex = [
     ["第四个", "3"],
 ]
 
-class ArduinoNanRGBLED {
+class ArduinoNanoRGBLED {
     constructor(runtime) {
         /**
          * The runtime instantiating this block package.
@@ -53,7 +53,7 @@ class ArduinoNanRGBLED {
      * @type {string}
      */
     static get STATE_KEY() {
-        return 'Scratch.ArduinoNanRGBLED';
+        return 'Scratch.ArduinoNanoRGBLED';
     }
 
     /**
@@ -90,10 +90,10 @@ class ArduinoNanRGBLED {
      * @private
      */
     _getState(target) {
-        let state = target.getCustomState(ArduinoNanRGBLED.STATE_KEY);
+        let state = target.getCustomState(ArduinoNanoRGBLED.STATE_KEY);
         if (!state) {
-            state = Clone.simple(ArduinoNanRGBLED.DEFAULT_HELLOWORLD_STATE);
-            target.setCustomState(ArduinoNanRGBLED.STATE_KEY, state);
+            state = Clone.simple(ArduinoNanoRGBLED.DEFAULT_HELLOWORLD_STATE);
+            target.setCustomState(ArduinoNanoRGBLED.STATE_KEY, state);
         }
         return state;
     }
@@ -103,7 +103,7 @@ class ArduinoNanRGBLED {
      */
     getInfo() {
         return {
-            id: 'ArduinoNanRGBLED',
+            id: 'ArduinoNanoRGBLED',
             name: "全彩灯模块",
             color1: colour,
             color2: colour,
@@ -185,4 +185,4 @@ class ArduinoNanRGBLED {
     }
 }
 
-module.exports = ArduinoNanRGBLED;
+module.exports = ArduinoNanoRGBLED;
