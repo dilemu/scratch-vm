@@ -624,9 +624,9 @@ class ArduinoPeripheral{
             if (value > 180) {
                 value = 180;
             }
-            this._firmata.pinMode(pin, this._firmata.MODES.PWM);
-            this._firmata.pwmWrite(pin, value);
-
+            // this._firmata.pinMode(pin, this._firmata.MODES.PWM);
+            // this._firmata.pwmWrite(pin, value);
+            this._firmata.pinMode(pin, this._firmata.MODES.SERVO);
             this._firmata.servoConfig(pin, 600, 2400);
             this._firmata.servoWrite(pin, value);
         }
