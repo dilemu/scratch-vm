@@ -141,11 +141,11 @@ class ArduinoNanoMotor {
 
     FanControl(pinA, pinB, direction, speed) {
         if(direction == 1) {
-            pinA = 0;
             this._peripheral.setPwmOutput(pinB, speed);
+            this._peripheral.setPwmOutput(pinA, 0);
         } else if(direction == 2) {
-            pinB = 0;
             this._peripheral.setPwmOutput(pinA, speed);
+            this._peripheral.setPwmOutput(pinB, 0);
         }
     }
 }
